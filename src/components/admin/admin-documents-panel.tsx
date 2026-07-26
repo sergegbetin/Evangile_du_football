@@ -124,7 +124,6 @@ export function AdminDocumentsPanel({ documents }: AdminDocumentsPanelProps) {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[#1A3A6B] hover:bg-[#1A3A6B]/90"
               >
                 {isSubmitting ? "Envoi en cours…" : "Publier"}
               </Button>

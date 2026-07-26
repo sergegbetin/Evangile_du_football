@@ -104,7 +104,7 @@ export function AdminClaimsPanel({ claims }: AdminClaimsPanelProps) {
                       <Textarea id="decision_notes" name="decision_notes" rows={2} />
                     </div>
                     <div className="flex gap-2">
-                      <Button type="submit" size="sm" className="bg-[#1A3A6B] hover:bg-[#1A3A6B]/90">
+                      <Button type="submit" size="sm">
                         Enregistrer
                       </Button>
                       <Button type="button" size="sm" variant="ghost" onClick={() => setProcessingId(null)}>

@@ -111,7 +111,6 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
               <Button
                 type="submit"
                 disabled={!homeId || !awayId}
-                className="bg-[#1A3A6B] hover:bg-[#1A3A6B]/90"
               >
                 Programmer le match
               </Button>
@@ -131,7 +130,7 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
                 <p className="font-medium">
                   {getJoinedName(match.home_team)} vs {getJoinedName(match.away_team)}
                   {match.home_score !== null && (
-                    <span className="ml-2 text-[#1A3A6B]">
+                    <span className="ml-2 text-[#d4af37]">
                       ({match.home_score} - {match.away_score})
                     </span>
                   )}

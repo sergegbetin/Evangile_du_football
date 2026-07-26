@@ -89,7 +89,6 @@ export function AdminTeamsPanel({ teams }: AdminTeamsPanelProps) {
                 <div className="flex flex-wrap gap-2 pt-2">
                   <Button
                     size="sm"
-                    className="bg-[#1A3A6B] hover:bg-[#1A3A6B]/90"
                     onClick={() => handleReview(team.id, "approve")}
                   >
                     Valider

@@ -68,7 +68,6 @@ export function ClaimsPanel({
             <Button
               onClick={() => setShowForm(true)}
               disabled={claimableMatches.length === 0}
-              className="bg-[#1A3A6B] hover:bg-[#1A3A6B]/90"
             >
               Nouvelle réclamation
             </Button>
@@ -109,7 +108,6 @@ export function ClaimsPanel({
                     <Button
                       type="submit"
                       disabled={!matchId}
-                      className="bg-[#1A3A6B] hover:bg-[#1A3A6B]/90"
                     >
                       Envoyer
                     </Button>

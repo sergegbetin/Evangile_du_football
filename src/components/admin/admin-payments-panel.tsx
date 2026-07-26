@@ -153,7 +153,6 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
               <Button
                 type="submit"
                 disabled={!teamId}
-                className="bg-[#1A3A6B] hover:bg-[#1A3A6B]/90"
               >
                 Enregistrer (reçu PAY-2026-XXXXXX)
               </Button>
