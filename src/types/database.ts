@@ -52,6 +52,7 @@ export interface Team {
   submitted_at: string | null
   approved_at: string | null
   rejection_reason: string | null
+  payment_declared_at: string | null
   created_at: string
   updated_at: string
 }
@@ -179,11 +180,12 @@ export interface Database {
       >
       teams: TableDef<
         Team,
-        Omit<Team, "id" | "created_at" | "updated_at" | "submitted_at" | "approved_at" | "rejection_reason"> & {
+        Omit<Team, "id" | "created_at" | "updated_at" | "submitted_at" | "approved_at" | "rejection_reason" | "payment_declared_at"> & {
           id?: string
           submitted_at?: string | null
           approved_at?: string | null
           rejection_reason?: string | null
+          payment_declared_at?: string | null
         },
         Partial<Omit<Team, "id">>
       >
@@ -259,7 +261,10 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      declare_team_payment: {
+        Args: Record<string, never>
+        Returns: string
+      }
     }
     Enums: {
       user_role: UserRole

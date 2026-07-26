@@ -1,7 +1,7 @@
 import { CreditCard, Clock, Home, MessageSquare, Shield } from "lucide-react"
 import { requireAuth, isCommitteeRole } from "@/lib/auth"
 import { getCoachTeam } from "@/lib/actions/teams"
-import { getCoachPayments } from "@/lib/actions/payments"
+import { getCoachPaymentSummary } from "@/lib/actions/payments"
 import { getCoachClaims } from "@/lib/actions/claims"
 import { getCoachUpcomingMatch } from "@/lib/actions/matches"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -13,7 +13,6 @@ import { DashboardPanel } from "@/components/layout/dashboard-panel"
 import { DashboardStatCard } from "@/components/layout/dashboard-stat-card"
 import { TEAM_STATUS_LABELS, TOURNAMENT } from "@/lib/constants"
 import {
-  computeTeamPaymentSummary,
   getPresenceRequiredMessage,
   TEAM_PAYMENT_STATUS_LABELS,
 } from "@/lib/tournament-rules"
@@ -27,10 +26,14 @@ export const metadata = {
 export default async function DashboardPage() {
   const profile = await requireAuth()
   const team = await getCoachTeam()
-  const payments = await getCoachPayments()
   const claims = await getCoachClaims()
   const isCommittee = isCommitteeRole(profile.role)
-  const paymentSummary = computeTeamPaymentSummary(payments)
+  const paymentSummary = (await getCoachPaymentSummary()) ?? {
+    totalPaidFcfa: 0,
+    totalExpectedFcfa: TOURNAMENT.totalFeeFcfa,
+    balanceFcfa: TOURNAMENT.totalFeeFcfa,
+    status: "impaye" as const,
+  }
   const pendingClaims = claims.filter((c) => c.status !== "decided").length
   const upcomingMatch = team ? await getCoachUpcomingMatch(team.id) : null
 
@@ -40,6 +43,25 @@ export default async function DashboardPage() {
         title={`Bonjour, ${profile.full_name.split(" ")[0]}`}
         description={`Bienvenue sur la plateforme ${TOURNAMENT.name}.`}
       />
+
+      {paymentSummary.balanceFcfa > 0 && team && (
+        <Alert className="border-amber-500/30 bg-amber-500/10 text-white">
+          <CreditCard className="text-amber-300" aria-hidden />
+          <AlertTitle className="text-white">Frais non soldés — règlement auprès du comité</AlertTitle>
+          <AlertDescription className="text-white/80">
+            Solde restant : {paymentSummary.balanceFcfa.toLocaleString("fr-FR")} FCFA.
+            Les frais se paient en espèces auprès du comité. Suivi et reçus sur{" "}
+            <ButtonLink
+              href="/dashboard/paiements"
+              variant="link"
+              className="h-auto p-0 text-[#d4af37]"
+            >
+              Paiements
+            </ButtonLink>
+            .
+          </AlertDescription>
+        </Alert>
+      )}
 
       {upcomingMatch && (
         <Alert className="border-[#d4af37]/30 bg-[#d4af37]/10 text-white">
@@ -122,7 +144,11 @@ export default async function DashboardPage() {
               className={
                 paymentSummary.status === "paye"
                   ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                  : "border-white/10 bg-white/[0.06] text-white/70"
+                  : paymentSummary.status === "en_attente"
+                    ? "border-sky-500/30 bg-sky-500/10 text-sky-200"
+                    : paymentSummary.status === "partiel"
+                      ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
+                      : "border-white/10 bg-white/[0.06] text-white/70"
               }
             >
               {TEAM_PAYMENT_STATUS_LABELS[paymentSummary.status]}

@@ -14,6 +14,10 @@
 UPDATE profiles SET role = 'committee', full_name = 'Secrétariat Kogoh', phone = '01 62 93 91 66'
 WHERE email = 'comite@kogoh.bj';
 
+-- Production committee (create the Auth user first if needed):
+-- UPDATE profiles SET role = 'committee', full_name = 'Secrétariat Kogoh', phone = '01 62 93 91 66'
+-- WHERE email = 'sergegbetin7@gmail.com';
+
 UPDATE profiles SET full_name = 'Jean Kouassi', phone = '01 62 93 91 66'
 WHERE email = 'coach@kogoh.bj';
 

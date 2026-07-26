@@ -237,6 +237,52 @@ export async function updateMatchScore(
 
   await logAudit("match.score_updated", "matches", parsed.data.match_id)
   revalidatePath("/admin/calendrier")
+  revalidatePath("/calendrier")
   revalidatePath("/classement")
+  return { success: true }
+}
+
+const matchStatusSchema = z.object({
+  match_id: z.string().uuid(),
+  status: z.enum(["scheduled", "postponed", "cancelled"]),
+})
+
+export async function updateMatchStatus(
+  formData: FormData
+): Promise<ActionResult> {
+  if (isPreviewMode()) return { success: false, error: PREVIEW_MUTATION_ERROR }
+
+  await requireCommittee()
+  const parsed = matchStatusSchema.safeParse({
+    match_id: formData.get("match_id"),
+    status: formData.get("status"),
+  })
+
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Données invalides" }
+  }
+
+  const supabase = await createClient()
+  const { data: updated, error } = await supabase
+    .from("matches")
+    .update({
+      status: parsed.data.status,
+      ended_at: null,
+    })
+    .eq("id", parsed.data.match_id)
+    .select("id")
+    .maybeSingle()
+
+  if (error) return { success: false, error: error.message }
+
+  if (!updated) {
+    return { success: false, error: "Match introuvable" }
+  }
+
+  await logAudit("match.status_updated", "matches", parsed.data.match_id, {
+    status: parsed.data.status,
+  })
+  revalidatePath("/admin/calendrier")
+  revalidatePath("/calendrier")
   return { success: true }
 }

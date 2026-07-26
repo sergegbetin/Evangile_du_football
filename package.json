@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "check:supabase": "node scripts/check-supabase.mjs",
     "seed:demo": "node scripts/seed-demo.mjs",
+    "onboard:committee": "node scripts/onboard-committee.mjs",
     "setup:supabase": "node scripts/check-supabase.mjs && node scripts/seed-demo.mjs"
   },
   "dependencies": {

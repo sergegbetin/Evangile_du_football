@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { createMatch, updateMatchScore } from "@/lib/actions/matches"
+import { createMatch, updateMatchScore, updateMatchStatus } from "@/lib/actions/matches"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -64,6 +65,44 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
       setSuccess("Score enregistré")
       router.refresh()
     }
+  }
+
+  async function handleStatus(
+    matchId: string,
+    status: "scheduled" | "postponed" | "cancelled"
+  ) {
+    const labels = {
+      scheduled: "reprogrammer (statut programmé)",
+      postponed: "reporter",
+      cancelled: "annuler",
+    } as const
+    if (!window.confirm(`Confirmer : ${labels[status]} ce match ?`)) return
+
+    setError(null)
+    setSuccess(null)
+    const formData = new FormData()
+    formData.set("match_id", matchId)
+    formData.set("status", status)
+    const result = await updateMatchStatus(formData)
+    if (!result.success) {
+      setError(result.error)
+    } else {
+      setSuccess(
+        status === "postponed"
+          ? "Match reporté — visible sur le calendrier public"
+          : status === "cancelled"
+            ? "Match annulé — visible sur le calendrier public"
+            : "Match remis au statut programmé"
+      )
+      router.refresh()
+    }
+  }
+
+  const statusBadge: Record<string, { label: string; className: string }> = {
+    scheduled: { label: "Programmé", className: "border-white/15 bg-white/5 text-white/70" },
+    completed: { label: "Terminé", className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" },
+    postponed: { label: "Reporté", className: "border-amber-500/30 bg-amber-500/10 text-amber-200" },
+    cancelled: { label: "Annulé", className: "border-white/10 bg-white/[0.04] text-white/40" },
   }
 
   return (
@@ -136,48 +175,88 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
         {matches.length === 0 ? (
           <DashboardEmptyState message="Aucun match" />
         ) : (
-          matches.map((match) => (
-            <Card key={match.id}>
-              <CardContent className="py-4">
-                <p className="font-medium">
-                  {getJoinedName(match.home_team)} vs {getJoinedName(match.away_team)}
-                  {match.home_score !== null && (
-                    <span className="ml-2 text-[#d4af37]">
-                      ({match.home_score} - {match.away_score})
-                    </span>
+          matches.map((match) => {
+            const badge = statusBadge[match.status] ?? statusBadge.scheduled
+            return (
+              <Card key={match.id}>
+                <CardContent className="py-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium">
+                      {getJoinedName(match.home_team)} vs {getJoinedName(match.away_team)}
+                      {match.home_score !== null && (
+                        <span className="ml-2 text-[#d4af37]">
+                          ({match.home_score} - {match.away_score})
+                        </span>
+                      )}
+                    </p>
+                    <Badge variant="secondary" className={badge.className}>
+                      {badge.label}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {format(new Date(match.scheduled_at), "EEEE d MMMM yyyy à HH:mm", { locale: fr })}
+                    {match.round && ` — ${match.round}`}
+                  </p>
+                  {match.status !== "completed" && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {scoringId === match.id ? (
+                        <form
+                          action={(fd) => handleScore(match.id, fd)}
+                          className="flex flex-wrap items-end gap-2"
+                        >
+                          <Input name="home_score" type="number" min={0} placeholder="Domicile" className="w-24" required />
+                          <Input name="away_score" type="number" min={0} placeholder="Extérieur" className="w-24" required />
+                          <Button type="submit" size="sm">Enregistrer score</Button>
+                          <Button type="button" size="sm" variant="ghost" onClick={() => setScoringId(null)}>
+                            Fermer
+                          </Button>
+                        </form>
+                      ) : (
+                        <>
+                          {match.status === "scheduled" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setScoringId(match.id)}
+                            >
+                              Saisir le score
+                            </Button>
+                          )}
+                          {match.status !== "postponed" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleStatus(match.id, "postponed")}
+                            >
+                              Reporter
+                            </Button>
+                          )}
+                          {match.status !== "cancelled" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleStatus(match.id, "cancelled")}
+                            >
+                              Annuler le match
+                            </Button>
+                          )}
+                          {(match.status === "postponed" || match.status === "cancelled") && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleStatus(match.id, "scheduled")}
+                            >
+                              Remettre en programmé
+                            </Button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   )}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {format(new Date(match.scheduled_at), "EEEE d MMMM yyyy à HH:mm", { locale: fr })}
-                  {match.round && ` — ${match.round}`}
-                </p>
-                {match.status !== "completed" && (
-                  scoringId === match.id ? (
-                    <form
-                      action={(fd) => handleScore(match.id, fd)}
-                      className="mt-3 flex flex-wrap items-end gap-2"
-                    >
-                      <Input name="home_score" type="number" min={0} placeholder="Domicile" className="w-24" required />
-                      <Input name="away_score" type="number" min={0} placeholder="Extérieur" className="w-24" required />
-                      <Button type="submit" size="sm">Enregistrer score</Button>
-                      <Button type="button" size="sm" variant="ghost" onClick={() => setScoringId(null)}>
-                        Annuler
-                      </Button>
-                    </form>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="mt-2"
-                      onClick={() => setScoringId(match.id)}
-                    >
-                      Saisir le score
-                    </Button>
-                  )
-                )}
-              </CardContent>
-            </Card>
-          ))
+                </CardContent>
+              </Card>
+            )
+          })
         )}
       </div>
     </div>

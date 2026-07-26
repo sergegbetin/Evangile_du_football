@@ -134,6 +134,10 @@ export function LoginForm() {
               S&apos;inscrire
             </Link>
           </p>
+          <p className="text-center text-xs text-white/60">
+            Les comptes comité sont créés par l&apos;organisateur — contactez le
+            secrétariat. Ne pas utiliser l&apos;inscription coach.
+          </p>
         </form>
       </div>
     </div>

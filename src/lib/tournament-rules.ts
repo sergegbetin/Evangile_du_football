@@ -129,7 +129,7 @@ export function getPresenceRequiredMessage(scheduledAt: string): string {
   return `Présence requise à ${formatTournamentHourTime(presenceAt)} pour le match de ${formatTournamentHourTime(matchAt)}`
 }
 
-export type TeamPaymentStatus = "impaye" | "partiel" | "paye"
+export type TeamPaymentStatus = "impaye" | "en_attente" | "partiel" | "paye"
 
 export interface TeamPaymentSummary {
   totalPaidFcfa: number
@@ -140,20 +140,30 @@ export interface TeamPaymentSummary {
 
 export const TEAM_PAYMENT_STATUS_LABELS: Record<TeamPaymentStatus, string> = {
   impaye: "Impayé",
+  en_attente: "En attente de confirmation",
   partiel: "Partiel",
   paye: "Payé",
 }
 
 export function computeTeamPaymentSummary(
-  payments: Pick<Payment, "amount_fcfa" | "status">[]
+  payments: Pick<Payment, "amount_fcfa" | "status">[],
+  options?: { paymentDeclaredAt?: string | null }
 ): TeamPaymentSummary {
   const totalPaidFcfa = payments
     .filter((p) => p.status === "confirmed")
     .reduce((sum, p) => sum + p.amount_fcfa, 0)
   const totalExpectedFcfa = TOURNAMENT.totalFeeFcfa
   const balanceFcfa = Math.max(totalExpectedFcfa - totalPaidFcfa, 0)
-  const status: TeamPaymentStatus =
+
+  let status: TeamPaymentStatus =
     totalPaidFcfa <= 0 ? "impaye" : balanceFcfa > 0 ? "partiel" : "paye"
+
+  if (
+    status !== "paye"
+    && options?.paymentDeclaredAt
+  ) {
+    status = "en_attente"
+  }
 
   return { totalPaidFcfa, totalExpectedFcfa, balanceFcfa, status }
 }

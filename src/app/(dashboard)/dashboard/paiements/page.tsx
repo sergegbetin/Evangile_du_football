@@ -1,6 +1,11 @@
-import { getCoachPayments } from "@/lib/actions/payments"
+import Link from "next/link"
+import {
+  getCoachPaymentSummary,
+  getCoachPayments,
+} from "@/lib/actions/payments"
 import { getCoachTeam } from "@/lib/actions/teams"
 import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Table,
   TableBody,
@@ -13,7 +18,9 @@ import { DashboardPageHeader } from "@/components/layout/dashboard-page-header"
 import { DashboardPageShell } from "@/components/layout/dashboard-page-shell"
 import { DashboardPanel } from "@/components/layout/dashboard-panel"
 import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
-import { computeTeamPaymentSummary, TEAM_PAYMENT_STATUS_LABELS } from "@/lib/tournament-rules"
+import { DeclarePaymentButton } from "@/components/dashboard/declare-payment-button"
+import { TEAM_PAYMENT_STATUS_LABELS } from "@/lib/tournament-rules"
+import { TOURNAMENT } from "@/lib/constants"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 
@@ -28,6 +35,13 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
   cancelled: "Annulé",
 }
 
+function paymentStatusBadgeClass(status: string): string {
+  if (status === "paye") return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+  if (status === "en_attente") return "border-sky-500/30 bg-sky-500/10 text-sky-200"
+  if (status === "partiel") return "border-amber-500/30 bg-amber-500/10 text-amber-200"
+  return "border-white/10 bg-white/[0.06] text-white/70"
+}
+
 export const metadata = {
   title: "Paiements",
 }
@@ -35,14 +49,47 @@ export const metadata = {
 export default async function PaiementsCoachPage() {
   const team = await getCoachTeam()
   const payments = await getCoachPayments()
-  const summary = computeTeamPaymentSummary(payments)
+  const summary = (await getCoachPaymentSummary()) ?? {
+    totalPaidFcfa: 0,
+    totalExpectedFcfa: TOURNAMENT.totalFeeFcfa,
+    balanceFcfa: TOURNAMENT.totalFeeFcfa,
+    status: "impaye" as const,
+  }
+
+  const canDeclare =
+    Boolean(team)
+    && team?.status === "approved"
+    && summary.status !== "paye"
+    && summary.status !== "en_attente"
 
   return (
     <DashboardPageShell>
       <DashboardPageHeader
         title="Paiements"
-        description="Consultez l'état de vos paiements enregistrés manuellement par le comité."
+        description="Les frais se règlent en espèces auprès du comité. Le suivi et les reçus apparaissent ici après enregistrement."
       />
+
+      <Alert className="border-[#d4af37]/25 bg-[#d4af37]/10 text-white">
+        <AlertTitle className="text-white">Paiement physique auprès du comité</AlertTitle>
+        <AlertDescription className="text-white/80">
+          Versez les frais ({TOURNAMENT.registrationFeeFcfa.toLocaleString("fr-FR")} FCFA
+          d&apos;inscription + {TOURNAMENT.participationFeeFcfa.toLocaleString("fr-FR")} FCFA
+          de participation) en espèces au secrétariat. Après versement, cliquez sur
+          « J&apos;ai réglé auprès du comité » : le statut passe en attente jusqu&apos;à
+          confirmation. Un reçu PDF devient disponible une fois le paiement enregistré.
+          Support : WhatsApp secrétariat {TOURNAMENT.contacts.whatsapp}.
+        </AlertDescription>
+      </Alert>
+
+      {summary.balanceFcfa > 0 && (
+        <Alert className="border-amber-500/30 bg-amber-500/10 text-white">
+          <AlertTitle className="text-white">Frais non soldés</AlertTitle>
+          <AlertDescription className="text-white/80">
+            Solde restant : {summary.balanceFcfa.toLocaleString("fr-FR")} FCFA — règlement
+            auprès du comité.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <DashboardPanel title="Récapitulatif">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -54,13 +101,7 @@ export default async function PaiementsCoachPage() {
               </p>
               <Badge
                 variant="secondary"
-                className={
-                  summary.status === "paye"
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                    : summary.status === "partiel"
-                      ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
-                      : "border-white/10 bg-white/[0.06] text-white/70"
-                }
+                className={paymentStatusBadgeClass(summary.status)}
               >
                 {TEAM_PAYMENT_STATUS_LABELS[summary.status]}
               </Badge>
@@ -78,6 +119,19 @@ export default async function PaiementsCoachPage() {
             </div>
           )}
         </div>
+
+        {team?.status === "approved" && summary.status !== "paye" && (
+          <div className="mt-6 border-t border-white/[0.06] pt-6">
+            {summary.status === "en_attente" ? (
+              <p className="text-sm text-sky-200">
+                Votre versement est signalé. Le comité confirmera bientôt l&apos;enregistrement
+                — le reçu apparaîtra alors ci-dessous.
+              </p>
+            ) : (
+              <DeclarePaymentButton disabled={!canDeclare} />
+            )}
+          </div>
+        )}
       </DashboardPanel>
 
       {!team ? (
@@ -124,6 +178,14 @@ export default async function PaiementsCoachPage() {
                         ? format(new Date(payment.recorded_at), "dd/MM/yyyy", { locale: fr })
                         : "Date non renseignée"}
                     </p>
+                    {payment.status === "confirmed" && (
+                      <Link
+                        href={`/dashboard/paiements/recu/${payment.id}`}
+                        className="mt-3 inline-block text-sm font-medium text-[#d4af37] underline-offset-4 hover:underline"
+                      >
+                        Télécharger le reçu
+                      </Link>
+                    )}
                   </article>
                 ))}
               </div>
@@ -136,7 +198,8 @@ export default async function PaiementsCoachPage() {
                       <TableHead className="text-white/70">Type</TableHead>
                       <TableHead className="text-white/70">Montant</TableHead>
                       <TableHead className="text-white/70">Statut</TableHead>
-                      <TableHead className="px-5 text-white/70 md:px-6">Date</TableHead>
+                      <TableHead className="text-white/70">Date</TableHead>
+                      <TableHead className="px-5 text-white/70 md:px-6">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -163,10 +226,22 @@ export default async function PaiementsCoachPage() {
                             {PAYMENT_STATUS_LABELS[payment.status] ?? payment.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="px-5 text-white/60 md:px-6">
+                        <TableCell className="text-white/60">
                           {payment.recorded_at
                             ? format(new Date(payment.recorded_at), "dd/MM/yyyy", { locale: fr })
                             : "—"}
+                        </TableCell>
+                        <TableCell className="px-5 md:px-6">
+                          {payment.status === "confirmed" ? (
+                            <Link
+                              href={`/dashboard/paiements/recu/${payment.id}`}
+                              className="text-sm font-medium text-[#d4af37] underline-offset-4 hover:underline"
+                            >
+                              Télécharger le reçu
+                            </Link>
+                          ) : (
+                            <span className="text-sm text-white/40">—</span>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

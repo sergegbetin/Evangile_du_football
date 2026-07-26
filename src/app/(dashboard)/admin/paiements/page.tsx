@@ -21,7 +21,7 @@ export default async function AdminPaiementsPage() {
       <DashboardPageHeader
         section="admin"
         title="Gestion des paiements"
-        description="Enregistrement manuel des paiements par le comité uniquement."
+        description="Enregistrement manuel des versements en espèces auprès du comité. Les coaches signalent « J’ai réglé » ; vous confirmez ici pour générer le reçu."
       />
       <DashboardPanel>
         <AdminPaymentsPanel

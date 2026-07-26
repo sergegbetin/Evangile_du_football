@@ -44,6 +44,7 @@ export const PREVIEW_COACH_TEAM: Team = {
   submitted_at: "2026-07-10T10:00:00.000Z",
   approved_at: "2026-07-12T14:00:00.000Z",
   rejection_reason: null,
+  payment_declared_at: null,
   created_at: now,
   updated_at: now,
 }
@@ -133,6 +134,7 @@ export const PREVIEW_SUBMITTED_TEAMS: TeamWithCoach[] = [
     submitted_at: "2026-07-18T16:00:00.000Z",
     approved_at: null,
     rejection_reason: null,
+    payment_declared_at: null,
     created_at: now,
     updated_at: now,
     coach: {
@@ -163,6 +165,7 @@ export const PREVIEW_APPROVED_TEAMS: Team[] = [
     submitted_at: "2026-07-08T10:00:00.000Z",
     approved_at: "2026-07-09T10:00:00.000Z",
     rejection_reason: null,
+    payment_declared_at: null,
     created_at: now,
     updated_at: now,
   },

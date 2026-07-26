@@ -6,6 +6,7 @@ import { TOURNAMENT } from "@/lib/constants"
 const tournoiLinks = [
   { href: "/#tournoi", label: "Présentation" },
   { href: "/documents", label: "Règlement" },
+  { href: "/aide", label: "Aide" },
   { href: "/calendrier", label: "Calendrier" },
   { href: "/classement", label: "Classement" },
   { href: "/#galerie", label: "Galerie" },

@@ -59,10 +59,11 @@ npm run check:supabase
 npm run setup:supabase
 ```
 
-Ou en une commande :
+Pour (re)créer un compte comité en production :
 
 ```bash
-npm run setup:supabase
+npm run onboard:committee
+# ou : npm run onboard:committee sergegbetin7@gmail.com
 ```
 
 Identifiants : voir **[IDENTIFIANTS.md](./IDENTIFIANTS.md)**

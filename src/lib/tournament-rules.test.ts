@@ -195,4 +195,23 @@ describe("computeTeamPaymentSummary", () => {
     expect(summary.totalPaidFcfa).toBe(0)
     expect(summary.status).toBe("impaye")
   })
+
+  it("reports en_attente when coach declared payment and balance remains", () => {
+    const summary = computeTeamPaymentSummary([], {
+      paymentDeclaredAt: "2026-07-26T10:00:00.000Z",
+    })
+    expect(summary.status).toBe("en_attente")
+    expect(summary.balanceFcfa).toBe(TOURNAMENT.totalFeeFcfa)
+  })
+
+  it("keeps paye even if a declaration timestamp is still set", () => {
+    const summary = computeTeamPaymentSummary(
+      [
+        { amount_fcfa: TOURNAMENT.registrationFeeFcfa, status: "confirmed" },
+        { amount_fcfa: TOURNAMENT.participationFeeFcfa, status: "confirmed" },
+      ],
+      { paymentDeclaredAt: "2026-07-26T10:00:00.000Z" }
+    )
+    expect(summary.status).toBe("paye")
+  })
 })

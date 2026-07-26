@@ -10,6 +10,7 @@ const navLinks = [
   { href: "/calendrier", label: "Calendrier" },
   { href: "/classement", label: "Classement" },
   { href: "/documents", label: "Documents" },
+  { href: "/aide", label: "Aide" },
   { href: "/#contact", label: "Contact" },
 ]
 

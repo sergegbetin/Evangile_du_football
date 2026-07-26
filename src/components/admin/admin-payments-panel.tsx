@@ -57,6 +57,11 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
   const [paymentType, setPaymentType] = useState<"registration" | "participation">("registration")
   const [teamId, setTeamId] = useState("")
 
+  const teamsWithBalance = teams.filter((team) => {
+    const summary = teamSummaries[team.id]
+    return summary ? summary.balanceFcfa > 0 : true
+  })
+
   async function handleRecord(formData: FormData) {
     setError(null)
     setSuccess(null)
@@ -100,6 +105,25 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
       {success && (
         <Alert className="border-emerald-500/30 bg-emerald-500/10">
           <AlertDescription>{success}</AlertDescription>
+        </Alert>
+      )}
+
+      {teamsWithBalance.length > 0 && (
+        <Alert className="border-amber-500/30 bg-amber-500/10 text-white">
+          <AlertDescription className="text-white/85">
+            Frais non soldés — règlement auprès du comité :{" "}
+            {teamsWithBalance
+              .map((team) => {
+                const summary = teamSummaries[team.id]!
+                const label =
+                  summary.status === "en_attente"
+                    ? `${team.name} (en attente de confirmation)`
+                    : team.name
+                return label
+              })
+              .join(", ")}
+            .
+          </AlertDescription>
         </Alert>
       )}
 
