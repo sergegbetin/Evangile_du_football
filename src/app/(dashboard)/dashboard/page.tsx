@@ -47,7 +47,7 @@ export default async function DashboardPage() {
           <AlertTitle className="text-white">Prochain match</AlertTitle>
           <AlertDescription className="text-white/80">
             <p>{getPresenceRequiredMessage(upcomingMatch.scheduled_at)}</p>
-            <p className="mt-1 text-sm text-white/55">
+            <p className="mt-1 text-sm text-white/60">
               {format(new Date(upcomingMatch.scheduled_at), "EEEE d MMMM yyyy 'à' HH'h'mm", {
                 locale: fr,
               })}
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
               </Badge>
             </>
           ) : (
-            <p className="text-sm leading-relaxed text-white/45">
+            <p className="text-sm leading-relaxed text-white/60">
               Aucune équipe inscrite. Commencez par enregistrer votre équipe.
             </p>
           )}
@@ -114,7 +114,7 @@ export default async function DashboardPage() {
         >
           <p className="text-3xl font-bold tracking-tight text-[#d4af37]">
             {paymentSummary.totalPaidFcfa.toLocaleString("fr-FR")}{" "}
-            <span className="text-lg font-medium text-white/45">FCFA</span>
+            <span className="text-lg font-medium text-white/60">FCFA</span>
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Badge
@@ -127,7 +127,7 @@ export default async function DashboardPage() {
             >
               {TEAM_PAYMENT_STATUS_LABELS[paymentSummary.status]}
             </Badge>
-            <span className="text-sm text-white/45">
+            <span className="text-sm text-white/60">
               sur {paymentSummary.totalExpectedFcfa.toLocaleString("fr-FR")} FCFA
             </span>
           </div>
@@ -140,7 +140,7 @@ export default async function DashboardPage() {
           linkLabel="Voir"
         >
           <p className="text-3xl font-bold tracking-tight text-white">{pendingClaims}</p>
-          <p className="mt-2 text-sm text-white/50">dossier(s) en cours de traitement</p>
+          <p className="mt-2 text-sm text-white/60">dossier(s) en cours de traitement</p>
         </DashboardStatCard>
       </div>
 
@@ -148,7 +148,7 @@ export default async function DashboardPage() {
         <DashboardPanel
           title="Vue comité"
           description="Vous pouvez aussi accéder à l'administration depuis le menu latéral."
-          contentClassName="flex items-start gap-3 text-sm text-white/55"
+          contentClassName="flex items-start gap-3 text-sm text-white/60"
         >
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-[#d4af37]" aria-hidden />
           <p>

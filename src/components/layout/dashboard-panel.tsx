@@ -23,7 +23,7 @@ export function DashboardPanel({
             <h2 className="text-base font-semibold text-white">{title}</h2>
           )}
           {description && (
-            <p className="mt-1 text-sm text-white/50">{description}</p>
+            <p className="mt-1 text-sm text-white/60">{description}</p>
           )}
         </header>
       )}

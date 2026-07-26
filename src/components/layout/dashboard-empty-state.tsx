@@ -9,7 +9,7 @@ export function DashboardEmptyState({ message, className }: DashboardEmptyStateP
   return (
     <p
       className={cn(
-        "py-10 text-center text-sm text-white/45",
+        "py-10 text-center text-sm text-white/60",
         className
       )}
     >

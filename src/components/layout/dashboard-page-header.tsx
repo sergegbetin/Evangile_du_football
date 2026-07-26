@@ -25,7 +25,7 @@ export function DashboardPageHeader({
         {title}
       </h1>
       {description && (
-        <p className="mt-2 max-w-2xl text-base leading-relaxed text-white/55">
+        <p className="mt-2 max-w-2xl text-base leading-relaxed text-white/60">
           {description}
         </p>
       )}

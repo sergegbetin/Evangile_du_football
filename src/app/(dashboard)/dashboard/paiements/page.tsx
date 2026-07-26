@@ -50,7 +50,7 @@ export default async function PaiementsCoachPage() {
             <div className="flex flex-wrap items-center gap-3">
               <p className="text-4xl font-bold tracking-tight text-[#d4af37]">
                 {summary.totalPaidFcfa.toLocaleString("fr-FR")}{" "}
-                <span className="text-xl font-semibold text-white/45">FCFA</span>
+                <span className="text-xl font-semibold text-white/60">FCFA</span>
               </p>
               <Badge
                 variant="secondary"
@@ -65,13 +65,13 @@ export default async function PaiementsCoachPage() {
                 {TEAM_PAYMENT_STATUS_LABELS[summary.status]}
               </Badge>
             </div>
-            <p className="mt-2 text-sm text-white/50">
+            <p className="mt-2 text-sm text-white/60">
               Total attendu : {summary.totalExpectedFcfa.toLocaleString("fr-FR")} FCFA
             </p>
           </div>
           {summary.balanceFcfa > 0 && (
             <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-white/40">Solde restant</p>
+              <p className="text-xs uppercase tracking-wide text-white/70">Solde restant</p>
               <p className="mt-1 text-lg font-semibold text-white">
                 {summary.balanceFcfa.toLocaleString("fr-FR")} FCFA
               </p>
@@ -119,7 +119,7 @@ export default async function PaiementsCoachPage() {
                     <p className="mt-3 text-lg font-semibold text-[#d4af37]">
                       {payment.amount_fcfa.toLocaleString("fr-FR")} FCFA
                     </p>
-                    <p className="mt-1 text-sm text-white/45">
+                    <p className="mt-1 text-sm text-white/60">
                       {payment.recorded_at
                         ? format(new Date(payment.recorded_at), "dd/MM/yyyy", { locale: fr })
                         : "Date non renseignée"}
@@ -132,11 +132,11 @@ export default async function PaiementsCoachPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-white/[0.06] hover:bg-transparent">
-                      <TableHead className="px-5 text-white/40 md:px-6">Reçu</TableHead>
-                      <TableHead className="text-white/40">Type</TableHead>
-                      <TableHead className="text-white/40">Montant</TableHead>
-                      <TableHead className="text-white/40">Statut</TableHead>
-                      <TableHead className="px-5 text-white/40 md:px-6">Date</TableHead>
+                      <TableHead className="px-5 text-white/70 md:px-6">Reçu</TableHead>
+                      <TableHead className="text-white/70">Type</TableHead>
+                      <TableHead className="text-white/70">Montant</TableHead>
+                      <TableHead className="text-white/70">Statut</TableHead>
+                      <TableHead className="px-5 text-white/70 md:px-6">Date</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -163,7 +163,7 @@ export default async function PaiementsCoachPage() {
                             {PAYMENT_STATUS_LABELS[payment.status] ?? payment.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="px-5 text-white/55 md:px-6">
+                        <TableCell className="px-5 text-white/60 md:px-6">
                           {payment.recorded_at
                             ? format(new Date(payment.recorded_at), "dd/MM/yyyy", { locale: fr })
                             : "—"}

@@ -105,20 +105,20 @@ export function DashboardShell({
             <TournamentLogo size="sm" />
             <div>
               <span className="block text-sm font-bold text-white">L&apos;Évangile</span>
-              <span className="block text-[10px] text-white/40">{TOURNAMENT.edition}</span>
+              <span className="block text-[10px] text-white/70">{TOURNAMENT.edition}</span>
             </div>
           </Link>
         </div>
 
         <nav className="flex-1 space-y-1 p-3" aria-label="Navigation tableau de bord">
-          <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/35">
+          <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/70">
             Espace coach
           </p>
           <NavLinks links={coachLinks} currentPath={currentPath} />
 
           {showAdmin && (
             <>
-              <p className="mt-4 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/35">
+              <p className="mt-4 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/70">
                 Administration
               </p>
               <NavLinks links={adminLinks} currentPath={currentPath} />
@@ -133,7 +133,7 @@ export function DashboardShell({
               {ROLE_LABELS[profile.role]}
             </span>
           </div>
-          <p className="truncate text-xs text-white/45">{profile.email}</p>
+          <p className="truncate text-xs text-white/60">{profile.email}</p>
           <form action={signOut} className="mt-3">
             <button
               type="submit"
@@ -182,7 +182,7 @@ export function DashboardShell({
           />
           {showAdmin && (
             <>
-              <p className="mt-4 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/35">
+              <p className="mt-4 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/70">
                 Administration
               </p>
               <NavLinks
