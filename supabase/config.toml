@@ -1,0 +1,8 @@
+# Supabase local config (optionnel — le schéma est appliqué via SQL Editor ou CLI)
+project_id = "kogoh-football"
+
+[api]
+enabled = true
+
+[db]
+major_version = 15
