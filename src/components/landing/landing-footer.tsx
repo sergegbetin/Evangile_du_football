@@ -80,8 +80,26 @@ export function LandingFooter() {
               CONTACT
             </h3>
             <ul className="mt-4 space-y-2 text-sm text-white/50">
-              <li>WhatsApp : {TOURNAMENT.contacts.whatsapp}</li>
-              <li>Tél : {TOURNAMENT.contacts.phone}</li>
+              <li>
+                WhatsApp :{" "}
+                <a
+                  href={TOURNAMENT.contacts.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-[#d4af37]"
+                >
+                  {TOURNAMENT.contacts.whatsapp}
+                </a>
+              </li>
+              <li>
+                Tél :{" "}
+                <a
+                  href={TOURNAMENT.contacts.phoneUrl}
+                  className="transition-colors hover:text-[#d4af37]"
+                >
+                  {TOURNAMENT.contacts.phone}
+                </a>
+              </li>
               <li>{TOURNAMENT.city}</li>
               <li>{TOURNAMENT.venue}</li>
             </ul>

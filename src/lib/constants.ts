@@ -23,6 +23,8 @@ export const TOURNAMENT = {
   contacts: {
     whatsapp: "01 62 93 91 66",
     phone: "01 28 43 81 80",
+    whatsappUrl: "https://wa.me/229162939166",
+    phoneUrl: "tel:+229128438180",
   },
 } as const
 
