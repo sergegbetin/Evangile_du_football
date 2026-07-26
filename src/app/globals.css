@@ -82,6 +82,14 @@
   }
 }
 
+/*
+ * P0 — Gold-as-primary design standard (landing + dashboard)
+ * Primary CTA: linear-gradient(#d4af37 → #c9a030), text #050608
+ * Form fields: rounded-xl, border white/10, bg white/5, placeholder white/30
+ * Focus: border #d4af37/50, ring 2px #d4af37/20
+ * Contrast floor: body copy white/60, micro labels white/70, muted-foreground 0.65
+ */
+
 /* Landing page theme */
 .landing-page {
   --gold: #d4af37;
@@ -90,8 +98,14 @@
   --landing-bg: #050608;
   --landing-surface: rgba(255, 255, 255, 0.04);
   --landing-border: rgba(212, 175, 55, 0.15);
+  --primary: #d4af37;
+  --primary-foreground: #050608;
+  --muted-foreground: rgba(255, 255, 255, 0.65);
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.05);
+  --ring: rgba(212, 175, 55, 0.4);
   background-color: var(--landing-bg);
-  color: #f5f5f5;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .landing-glass {
@@ -185,7 +199,7 @@
   --secondary: rgba(255, 255, 255, 0.06);
   --secondary-foreground: #f5f5f5;
   --muted: rgba(255, 255, 255, 0.06);
-  --muted-foreground: rgba(255, 255, 255, 0.55);
+  --muted-foreground: rgba(255, 255, 255, 0.65);
   --accent: rgba(212, 175, 55, 0.12);
   --accent-foreground: #d4af37;
   --destructive: oklch(0.704 0.191 22.216);
@@ -230,4 +244,38 @@
   background-image:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(212, 175, 55, 0.07), transparent),
     radial-gradient(ellipse 60% 40% at 100% 0%, rgba(255, 255, 255, 0.03), transparent);
+}
+
+@layer components {
+  .landing-page [data-slot="input"],
+  .landing-page [data-slot="textarea"],
+  .landing-page [data-slot="select-trigger"],
+  .dashboard-page [data-slot="input"],
+  .dashboard-page [data-slot="textarea"],
+  .dashboard-page [data-slot="select-trigger"] {
+    @apply h-auto min-h-[2.75rem] rounded-xl border-white/10 bg-white/5 px-4 py-3 text-sm text-white shadow-none;
+    @apply placeholder:text-white/30;
+    @apply focus-visible:border-[#d4af37]/50 focus-visible:ring-2 focus-visible:ring-[#d4af37]/20;
+  }
+
+  .landing-page [data-slot="textarea"],
+  .dashboard-page [data-slot="textarea"] {
+    @apply min-h-[5rem];
+  }
+
+  .landing-page [data-slot="select-trigger"],
+  .dashboard-page [data-slot="select-trigger"] {
+    @apply w-full;
+  }
+
+  .landing-page [data-slot="button"].bg-primary,
+  .dashboard-page [data-slot="button"].bg-primary {
+    @apply rounded-xl border-transparent bg-gradient-to-r from-[#d4af37] to-[#c9a030] text-[#050608] shadow-none;
+    @apply hover:from-[#c9a030] hover:to-[#b8922a] hover:bg-transparent;
+  }
+
+  .landing-page [data-slot="button"].bg-primary[data-size="brand"],
+  .dashboard-page [data-slot="button"].bg-primary[data-size="brand"] {
+    @apply min-h-[3rem] w-full gap-2 py-4 text-sm font-bold;
+  }
 }
