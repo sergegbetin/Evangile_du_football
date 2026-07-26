@@ -128,4 +128,3 @@ npm start
 ## Déploiement
 
 Compatible Vercel, Render ou tout hébergeur Node.js. Configurez les variables d'environnement et mettez à jour les URLs de redirection Supabase pour votre domaine de production.
-# Evangile_du_football
