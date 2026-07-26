@@ -41,7 +41,8 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
     setSuccess(null)
     formData.set("home_team_id", homeId)
     formData.set("away_team_id", awayId)
-    formData.set("venue", TOURNAMENT.venue)
+    const venue = String(formData.get("venue") ?? "").trim()
+    formData.set("venue", venue || TOURNAMENT.venue)
     const result = await createMatch(formData)
     if (!result.success) {
       setError(result.error)
@@ -153,6 +154,16 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
             <div className="space-y-2">
               <Label htmlFor="scheduled_at">Date et heure</Label>
               <Input id="scheduled_at" name="scheduled_at" type="datetime-local" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="venue">Lieu</Label>
+              <Input
+                id="venue"
+                name="venue"
+                placeholder={`Ex: Quartier Latin, À confirmer, ${TOURNAMENT.venue}`}
+                defaultValue={TOURNAMENT.venue}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="round">Tour / Phase</Label>
