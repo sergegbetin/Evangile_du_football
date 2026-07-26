@@ -6,8 +6,23 @@ export const TEAM_LOGO_BY_NAME: Record<string, string> = {
   "Canaan FC": "/teams/canaan-fc.jpg",
 }
 
+export type PoolId = "A" | "B"
+
 export function getTeamLogoPath(teamName: string): string | null {
   return TEAM_LOGO_BY_NAME[teamName] ?? null
+}
+
+/** Two-letter initials for teams without a logo asset yet. */
+export function getTeamInitials(teamName: string): string {
+  const parts = teamName
+    .replace(/\b(FC|EPF)\b/gi, "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+
+  if (parts.length === 0) return teamName.slice(0, 2).toUpperCase()
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase()
 }
 
 export const POOL_TEAMS = [
@@ -52,6 +67,12 @@ export const POOL_TEAMS = [
     church: "Église Pentecôte de la Foi de Gbegamey",
   },
 ] as const
+
+export type PoolTeam = (typeof POOL_TEAMS)[number]
+
+export function getPoolTeams(pool: PoolId): PoolTeam[] {
+  return POOL_TEAMS.filter((team) => team.pool === pool)
+}
 
 export const POOL_MATCHES = [
   {

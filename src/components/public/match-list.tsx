@@ -1,10 +1,9 @@
-import Image from "next/image"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Calendar, Clock, MapPin } from "lucide-react"
 import type { MatchWithTeams } from "@/types/database"
 import { getPresenceRequiredMessage } from "@/lib/tournament-rules"
-import { getTeamLogoPath } from "@/lib/pool-data"
+import { TeamBadge } from "@/components/public/team-badge"
 
 const statusLabels: Record<string, { label: string; className: string }> = {
   scheduled: { label: "Programmé", className: "text-white/50 bg-white/5" },
@@ -23,36 +22,6 @@ function getTeamName(team: { name: string } | { name: string }[] | null | undefi
   if (!team) return "—"
   if (Array.isArray(team)) return team[0]?.name ?? "—"
   return team.name
-}
-
-function TeamLabel({
-  name,
-  align,
-}: {
-  name: string
-  align: "start" | "end"
-}) {
-  const logoPath = getTeamLogoPath(name)
-  return (
-    <div
-      className={`flex items-center gap-3 ${
-        align === "end" ? "flex-row-reverse sm:flex-row-reverse" : ""
-      }`}
-    >
-      {logoPath ? (
-        <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-white/15 bg-white/5">
-          <Image
-            src={logoPath}
-            alt={`Logo ${name}`}
-            fill
-            className="object-cover"
-            sizes="40px"
-          />
-        </span>
-      ) : null}
-      <span className="font-semibold text-white">{name}</span>
-    </div>
-  )
 }
 
 export function MatchList({
@@ -104,8 +73,8 @@ export function MatchList({
             </div>
 
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-              <div className="flex flex-1 items-center justify-end gap-3 text-right">
-                <TeamLabel name={homeName} align="end" />
+              <div className="flex flex-1 items-center justify-end gap-3">
+                <TeamBadge name={homeName} align="end" />
               </div>
 
               <div className="flex shrink-0 flex-col items-center px-4">
@@ -123,7 +92,7 @@ export function MatchList({
               </div>
 
               <div className="flex flex-1 items-center gap-3">
-                <TeamLabel name={awayName} align="start" />
+                <TeamBadge name={awayName} align="start" />
               </div>
             </div>
 

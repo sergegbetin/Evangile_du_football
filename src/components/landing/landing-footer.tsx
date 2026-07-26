@@ -8,6 +8,7 @@ const tournoiLinks = [
   { href: "/documents", label: "Règlement" },
   { href: "/aide", label: "Aide" },
   { href: "/calendrier", label: "Calendrier" },
+  { href: "/classement#poules", label: "Poules" },
   { href: "/classement", label: "Classement" },
   { href: "/#galerie", label: "Galerie" },
 ]

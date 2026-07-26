@@ -8,6 +8,7 @@ import { TournamentLogo } from "@/components/landing/tournament-logo"
 const navLinks = [
   { href: "/#tournoi", label: "Tournoi" },
   { href: "/calendrier", label: "Calendrier" },
+  { href: "/classement#poules", label: "Poules" },
   { href: "/classement", label: "Classement" },
   { href: "/documents", label: "Documents" },
   { href: "/aide", label: "Aide" },
