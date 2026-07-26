@@ -11,6 +11,8 @@ export const TOURNAMENT = {
   /** Football à 6 — au moins 6 joueurs avec photo pour soumettre le dossier */
   minPlayersToSubmit: 6,
   presenceHoursBeforeMatch: 1,
+  /** Bénin — used for kickoff / presence display (no DST). */
+  timeZone: "Africa/Porto-Novo",
   lateFeeFcfa: 2_000,
   rosterLockHoursBeforeFirstMatch: 24,
   claimDeadlineHours: 24,

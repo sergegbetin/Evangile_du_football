@@ -141,16 +141,17 @@ describe("getPresenceRequiredAt", () => {
 })
 
 describe("getPresenceRequiredMessage", () => {
-  it("formats the presence reminder in French with hour times", () => {
-    const message = getPresenceRequiredMessage("2026-07-26T16:00:00.000Z")
+  it("formats presence in Benin local time for a 16h00 kickoff", () => {
+    // 16:00 Africa/Porto-Novo == 15:00 UTC
+    const message = getPresenceRequiredMessage("2026-07-26T15:00:00.000Z")
 
-    expect(message).toMatch(
-      /^Présence requise à \d{2}h\d{2} pour le match de \d{2}h\d{2}$/
+    expect(message).toBe(
+      "Présence requise à 15h00 pour le match de 16h00"
     )
   })
 
   it("reflects the configured presence window before kickoff", () => {
-    const scheduledAt = "2026-07-26T16:00:00.000Z"
+    const scheduledAt = "2026-07-26T15:00:00.000Z"
     const kickoff = new Date(scheduledAt)
     const presenceAt = getPresenceRequiredAt(scheduledAt)
 

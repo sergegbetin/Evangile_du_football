@@ -110,8 +110,18 @@ export function getClaimDeadlineMessage(): string {
   return `Les réclamations doivent être déposées dans les ${TOURNAMENT.claimDeadlineHours} heures suivant la fin du match concerné.`
 }
 
-function formatTournamentHourTime(date: Date): string {
-  return format(date, "HH'h'mm", { locale: fr })
+/** Formats a wall-clock time in the tournament timezone (Bénin). */
+export function formatTournamentHourTime(date: Date): string {
+  const parts = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: TOURNAMENT.timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date)
+
+  const hour = parts.find((part) => part.type === "hour")?.value ?? "00"
+  const minute = parts.find((part) => part.type === "minute")?.value ?? "00"
+  return `${hour}h${minute}`
 }
 
 /** Presence check-in time: `presenceHoursBeforeMatch` before kickoff (reglement). */

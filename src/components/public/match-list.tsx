@@ -2,7 +2,10 @@ import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Calendar, Clock, MapPin } from "lucide-react"
 import type { MatchWithTeams } from "@/types/database"
-import { getPresenceRequiredMessage } from "@/lib/tournament-rules"
+import {
+  formatTournamentHourTime,
+  getPresenceRequiredMessage,
+} from "@/lib/tournament-rules"
 import { TeamBadge } from "@/components/public/team-badge"
 
 const statusLabels: Record<string, { label: string; className: string }> = {
@@ -101,16 +104,20 @@ export function MatchList({
                 <Calendar className="h-3.5 w-3.5" />
                 {format(new Date(match.scheduled_at), "EEEE d MMMM yyyy", { locale: fr })}
               </span>
-              <span>{format(new Date(match.scheduled_at), "HH:mm", { locale: fr })}</span>
+              <span>
+                {formatTournamentHourTime(new Date(match.scheduled_at)).replace("h", ":")}
+              </span>
               <span className="flex items-center gap-1.5">
                 <MapPin className="h-3.5 w-3.5" />
                 {match.venue}
               </span>
             </div>
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-[#d4af37]/80">
-              <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              {getPresenceRequiredMessage(match.scheduled_at)}
-            </p>
+            {(match.status === "scheduled" || match.status === "postponed") && (
+              <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-[#d4af37]/80">
+                <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                {getPresenceRequiredMessage(match.scheduled_at)}
+              </p>
+            )}
           </article>
         )
       })}
