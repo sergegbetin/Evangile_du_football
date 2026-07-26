@@ -41,12 +41,14 @@ interface AdminDocumentsPanelProps {
 export function AdminDocumentsPanel({ documents }: AdminDocumentsPanelProps) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [category, setCategory] = useState<string>("autre")
   const [isPublic, setIsPublic] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleUpload(formData: FormData) {
     setError(null)
+    setSuccess(null)
     setIsSubmitting(true)
     formData.set("category", category)
     if (isPublic) formData.set("is_public", "on")
@@ -55,16 +57,20 @@ export function AdminDocumentsPanel({ documents }: AdminDocumentsPanelProps) {
     if (!result.success) {
       setError(result.error)
     } else {
+      setSuccess("Document publié")
       router.refresh()
     }
   }
 
   async function handleDelete(id: string) {
+    if (!window.confirm("Supprimer ce document définitivement ?")) return
     setError(null)
+    setSuccess(null)
     const result = await deleteDocument(id)
     if (!result.success) {
       setError(result.error)
     } else {
+      setSuccess("Document supprimé")
       router.refresh()
     }
   }
@@ -74,6 +80,11 @@ export function AdminDocumentsPanel({ documents }: AdminDocumentsPanelProps) {
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {success && (
+        <Alert className="border-emerald-500/30 bg-emerald-500/10">
+          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 

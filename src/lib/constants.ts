@@ -47,3 +47,9 @@ export const CLAIM_STATUS_LABELS: Record<string, string> = {
   in_review: "En instruction",
   decided: "Tranchée",
 }
+
+export const CLAIM_DECISION_LABELS: Record<string, string> = {
+  pending: "En attente",
+  accepted: "Acceptée",
+  rejected: "Rejetée",
+}

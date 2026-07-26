@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { CLAIM_STATUS_LABELS } from "@/lib/constants"
+import { CLAIM_DECISION_LABELS, CLAIM_STATUS_LABELS } from "@/lib/constants"
 import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -39,17 +39,21 @@ export function ClaimsPanel({
 }: ClaimsPanelProps) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [matchId, setMatchId] = useState("")
 
   async function handleCreate(formData: FormData) {
     setError(null)
+    setSuccess(null)
     formData.set("match_id", matchId)
     const result = await createClaim(formData)
     if (!result.success) {
       setError(result.error)
     } else {
       setShowForm(false)
+      setMatchId("")
+      setSuccess("Réclamation envoyée")
       router.refresh()
     }
   }
@@ -59,6 +63,11 @@ export function ClaimsPanel({
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {success && (
+        <Alert className="border-emerald-500/30 bg-emerald-500/10">
+          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 
@@ -151,9 +160,25 @@ export function ClaimsPanel({
                       {format(new Date(claim.created_at), "dd MMMM yyyy à HH:mm", { locale: fr })}
                     </p>
                   </div>
-                  <Badge variant="secondary">
-                    {CLAIM_STATUS_LABELS[claim.status] ?? claim.status}
-                  </Badge>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary">
+                      {CLAIM_STATUS_LABELS[claim.status] ?? claim.status}
+                    </Badge>
+                    {claim.status === "decided" && (
+                      <Badge
+                        variant="secondary"
+                        className={
+                          claim.decision === "accepted"
+                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                            : claim.decision === "rejected"
+                              ? "border-red-500/30 bg-red-500/10 text-red-300"
+                              : undefined
+                        }
+                      >
+                        {CLAIM_DECISION_LABELS[claim.decision] ?? claim.decision}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 {claim.decision_notes && (
                   <p className="mt-3 rounded-md bg-muted p-3 text-sm">

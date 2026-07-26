@@ -53,11 +53,13 @@ const STATUS_LABELS: Record<string, string> = {
 export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaymentsPanelProps) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [paymentType, setPaymentType] = useState<"registration" | "participation">("registration")
   const [teamId, setTeamId] = useState("")
 
   async function handleRecord(formData: FormData) {
     setError(null)
+    setSuccess(null)
     formData.set("team_id", teamId)
     formData.set("payment_type", paymentType)
     formData.set("amount_fcfa", String(PAYMENT_AMOUNTS[paymentType]))
@@ -66,12 +68,16 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
     if (!result.success) {
       setError(result.error)
     } else {
+      setSuccess("Paiement enregistré")
+      setTeamId("")
       router.refresh()
     }
   }
 
   async function handleCancel(paymentId: string) {
+    if (!window.confirm("Annuler ce paiement ?")) return
     setError(null)
+    setSuccess(null)
     const formData = new FormData()
     formData.set("payment_id", paymentId)
     formData.set("status", "cancelled")
@@ -79,6 +85,7 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
     if (!result.success) {
       setError(result.error)
     } else {
+      setSuccess("Paiement annulé")
       router.refresh()
     }
   }
@@ -88,6 +95,11 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {success && (
+        <Alert className="border-emerald-500/30 bg-emerald-500/10">
+          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 

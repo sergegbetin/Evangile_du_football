@@ -140,6 +140,10 @@ export interface TeamWithCoach extends Team {
   coach?: Profile
 }
 
+export interface TeamWithCoachAndRoster extends TeamWithCoach {
+  roster: RosterMember[]
+}
+
 export interface MatchWithTeams extends Match {
   home_team?: { name: string } | { name: string }[] | null
   away_team?: { name: string } | { name: string }[] | null

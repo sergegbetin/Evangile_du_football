@@ -24,12 +24,14 @@ interface AdminClaimsPanelProps {
 export function AdminClaimsPanel({ claims }: AdminClaimsPanelProps) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [status, setStatus] = useState("in_review")
   const [decision, setDecision] = useState("pending")
 
   async function handleProcess(claimId: string, formData: FormData) {
     setError(null)
+    setSuccess(null)
     formData.set("claim_id", claimId)
     formData.set("status", status)
     formData.set("decision", decision)
@@ -38,6 +40,7 @@ export function AdminClaimsPanel({ claims }: AdminClaimsPanelProps) {
       setError(result.error)
     } else {
       setProcessingId(null)
+      setSuccess("Décision enregistrée")
       router.refresh()
     }
   }
@@ -47,6 +50,11 @@ export function AdminClaimsPanel({ claims }: AdminClaimsPanelProps) {
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {success && (
+        <Alert className="border-emerald-500/30 bg-emerald-500/10">
+          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 

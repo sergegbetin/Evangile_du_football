@@ -30,12 +30,14 @@ interface AdminCalendarPanelProps {
 export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [homeId, setHomeId] = useState("")
   const [awayId, setAwayId] = useState("")
   const [scoringId, setScoringId] = useState<string | null>(null)
 
   async function handleCreate(formData: FormData) {
     setError(null)
+    setSuccess(null)
     formData.set("home_team_id", homeId)
     formData.set("away_team_id", awayId)
     formData.set("venue", TOURNAMENT.venue)
@@ -43,18 +45,23 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
     if (!result.success) {
       setError(result.error)
     } else {
+      setSuccess("Match programmé")
+      setHomeId("")
+      setAwayId("")
       router.refresh()
     }
   }
 
   async function handleScore(matchId: string, formData: FormData) {
     setError(null)
+    setSuccess(null)
     formData.set("match_id", matchId)
     const result = await updateMatchScore(formData)
     if (!result.success) {
       setError(result.error)
     } else {
       setScoringId(null)
+      setSuccess("Score enregistré")
       router.refresh()
     }
   }
@@ -64,6 +71,11 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {success && (
+        <Alert className="border-emerald-500/30 bg-emerald-500/10">
+          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 

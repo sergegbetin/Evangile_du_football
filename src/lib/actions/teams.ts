@@ -7,6 +7,7 @@ import { isPreviewMode, PREVIEW_MUTATION_ERROR } from "@/lib/preview-mode"
 import {
   PREVIEW_APPROVED_TEAMS,
   PREVIEW_COACH_TEAM,
+  PREVIEW_ROSTER,
   PREVIEW_SUBMITTED_TEAMS,
 } from "@/lib/demo-data"
 import {
@@ -16,7 +17,13 @@ import {
 } from "@/lib/validations/team"
 import { logAudit } from "@/lib/actions/audit"
 import { TOURNAMENT } from "@/lib/constants"
-import type { ActionResult, Team, TeamWithCoach } from "@/types/database"
+import type {
+  ActionResult,
+  RosterMember,
+  Team,
+  TeamWithCoach,
+  TeamWithCoachAndRoster,
+} from "@/types/database"
 
 export async function getCoachTeam(): Promise<Team | null> {
   if (isPreviewMode()) return PREVIEW_COACH_TEAM
@@ -294,6 +301,53 @@ export async function getSubmittedTeams(): Promise<TeamWithCoach[]> {
     .order("submitted_at", { ascending: false })
 
   return (data ?? []) as TeamWithCoach[]
+}
+
+/** Submitted/approved/rejected teams with roster for committee review. */
+export async function getSubmittedTeamsWithRoster(): Promise<
+  TeamWithCoachAndRoster[]
+> {
+  if (isPreviewMode()) {
+    return PREVIEW_SUBMITTED_TEAMS.map((team) => ({
+      ...team,
+      roster: PREVIEW_ROSTER.filter((m) => m.team_id === team.id),
+    }))
+  }
+
+  await requireCommittee()
+  const teams = await getSubmittedTeams()
+  if (teams.length === 0) return []
+
+  const supabase = await createClient()
+  const teamIds = teams.map((t) => t.id)
+
+  const { data: members } = await supabase
+    .from("roster_members")
+    .select("*")
+    .in("team_id", teamIds)
+    .order("member_type")
+    .order("full_name")
+
+  const byTeam = new Map<string, RosterMember[]>()
+  for (const member of (members ?? []) as RosterMember[]) {
+    const list = byTeam.get(member.team_id) ?? []
+    list.push(member)
+    byTeam.set(member.team_id, list)
+  }
+
+  const withRoster: TeamWithCoachAndRoster[] = teams.map((team) => ({
+    ...team,
+    roster: byTeam.get(team.id) ?? [],
+  }))
+
+  // Submitted dossiers first, then by submission date desc.
+  return withRoster.sort((a, b) => {
+    if (a.status === "submitted" && b.status !== "submitted") return -1
+    if (b.status === "submitted" && a.status !== "submitted") return 1
+    const aAt = a.submitted_at ? new Date(a.submitted_at).getTime() : 0
+    const bAt = b.submitted_at ? new Date(b.submitted_at).getTime() : 0
+    return bAt - aAt
+  })
 }
 
 export async function getApprovedTeams(): Promise<Team[]> {

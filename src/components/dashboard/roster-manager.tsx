@@ -93,6 +93,7 @@ export function RosterManager({
   }
 
   async function handleRemove(id: string) {
+    if (!window.confirm("Retirer ce membre de l'effectif ?")) return
     setError(null)
     setSuccess(null)
     const result = await removeRosterMember(id)
