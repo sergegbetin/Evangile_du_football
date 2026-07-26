@@ -34,10 +34,13 @@ const timelineIcons = {
 
 export function LandingCountdown() {
   const [time, setTime] = useState(EMPTY_TIME)
+  const [isExpired, setIsExpired] = useState(false)
 
   useEffect(() => {
     function updateTime() {
-      setTime(getTimeLeft(COUNTDOWN_TARGET))
+      const left = getTimeLeft(COUNTDOWN_TARGET)
+      setTime(left)
+      setIsExpired(COUNTDOWN_TARGET.getTime() <= Date.now())
     }
 
     updateTime()
@@ -75,25 +78,37 @@ export function LandingCountdown() {
         </ScrollReveal>
 
         <ScrollReveal delay={150} className="mt-12">
-          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
-            {units.map((unit, index) => (
-              <div key={unit.label} className="flex items-center gap-3 md:gap-4">
-                <div className="landing-glass flex min-w-[80px] flex-col items-center rounded-2xl px-6 py-5 md:min-w-[100px] md:px-8 md:py-6">
-                  <span className="text-4xl font-bold tabular-nums text-white md:text-5xl">
-                    {pad(unit.value)}
-                  </span>
-                  <span className="mt-2 text-[10px] font-semibold tracking-[0.15em] text-white/40">
-                    {unit.label}
-                  </span>
+          {isExpired ? (
+            <div className="landing-glass mx-auto max-w-xl rounded-2xl px-6 py-8 text-center">
+              <p className="text-xl font-semibold text-white">
+                Le tournoi est en cours
+              </p>
+              <p className="mt-2 text-sm text-white/50">
+                Consultez le calendrier pour suivre les matchs programmés et les
+                résultats.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
+              {units.map((unit, index) => (
+                <div key={unit.label} className="flex items-center gap-3 md:gap-4">
+                  <div className="landing-glass flex min-w-[80px] flex-col items-center rounded-2xl px-6 py-5 md:min-w-[100px] md:px-8 md:py-6">
+                    <span className="text-4xl font-bold tabular-nums text-white md:text-5xl">
+                      {pad(unit.value)}
+                    </span>
+                    <span className="mt-2 text-[10px] font-semibold tracking-[0.15em] text-white/40">
+                      {unit.label}
+                    </span>
+                  </div>
+                  {index < units.length - 1 && (
+                    <span className="hidden text-2xl font-bold text-[#d4af37] md:inline">
+                      :
+                    </span>
+                  )}
                 </div>
-                {index < units.length - 1 && (
-                  <span className="hidden text-2xl font-bold text-[#d4af37] md:inline">
-                    :
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </ScrollReveal>
 
         <div className="mt-16 grid gap-6 md:grid-cols-2">

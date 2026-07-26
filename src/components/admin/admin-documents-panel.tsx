@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { documentCategories } from "@/lib/validations/document"
+import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 
@@ -150,8 +151,8 @@ export function AdminDocumentsPanel({ documents }: AdminDocumentsPanelProps) {
             <TableBody>
               {documents.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-muted-foreground">
-                    Aucun document publié
+                  <TableCell colSpan={5} className="p-0">
+                    <DashboardEmptyState message="Aucun document publié" />
                   </TableCell>
                 </TableRow>
               ) : (

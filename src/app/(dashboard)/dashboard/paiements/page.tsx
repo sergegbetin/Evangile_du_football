@@ -12,6 +12,7 @@ import {
 import { DashboardPageHeader } from "@/components/layout/dashboard-page-header"
 import { DashboardPageShell } from "@/components/layout/dashboard-page-shell"
 import { DashboardPanel } from "@/components/layout/dashboard-panel"
+import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
 import { computeTeamPaymentSummary, TEAM_PAYMENT_STATUS_LABELS } from "@/lib/tournament-rules"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -81,40 +82,29 @@ export default async function PaiementsCoachPage() {
 
       {!team ? (
         <DashboardPanel>
-          <p className="text-white/50">Inscrivez d&apos;abord votre équipe.</p>
+          <DashboardEmptyState message="Inscrivez d'abord votre équipe." />
         </DashboardPanel>
       ) : (
         <DashboardPanel title="Historique des paiements" contentClassName="p-0 md:p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-white/[0.06] hover:bg-transparent">
-                <TableHead className="px-5 text-white/40 md:px-6">Reçu</TableHead>
-                <TableHead className="text-white/40">Type</TableHead>
-                <TableHead className="text-white/40">Montant</TableHead>
-                <TableHead className="text-white/40">Statut</TableHead>
-                <TableHead className="px-5 text-white/40 md:px-6">Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payments.length === 0 ? (
-                <TableRow className="border-white/[0.06]">
-                  <TableCell colSpan={5} className="px-5 py-10 text-center text-white/45 md:px-6">
-                    Aucun paiement enregistré pour le moment.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                payments.map((payment) => (
-                  <TableRow key={payment.id} className="border-white/[0.06] hover:bg-white/[0.02]">
-                    <TableCell className="px-5 font-mono text-sm text-white/80 md:px-6">
-                      {payment.receipt_number}
-                    </TableCell>
-                    <TableCell className="text-white/80">
-                      {PAYMENT_TYPE_LABELS[payment.payment_type] ?? payment.payment_type}
-                    </TableCell>
-                    <TableCell className="font-medium text-white/90">
-                      {payment.amount_fcfa.toLocaleString("fr-FR")} FCFA
-                    </TableCell>
-                    <TableCell>
+          {payments.length === 0 ? (
+            <DashboardEmptyState message="Aucun paiement enregistré pour le moment." />
+          ) : (
+            <>
+              <div className="space-y-3 p-5 md:hidden">
+                {payments.map((payment) => (
+                  <article
+                    key={payment.id}
+                    className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-sm text-white/80">
+                          {payment.receipt_number}
+                        </p>
+                        <p className="mt-1 font-medium text-white">
+                          {PAYMENT_TYPE_LABELS[payment.payment_type] ?? payment.payment_type}
+                        </p>
+                      </div>
                       <Badge
                         variant="secondary"
                         className={
@@ -125,17 +115,66 @@ export default async function PaiementsCoachPage() {
                       >
                         {PAYMENT_STATUS_LABELS[payment.status] ?? payment.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="px-5 text-white/55 md:px-6">
+                    </div>
+                    <p className="mt-3 text-lg font-semibold text-[#d4af37]">
+                      {payment.amount_fcfa.toLocaleString("fr-FR")} FCFA
+                    </p>
+                    <p className="mt-1 text-sm text-white/45">
                       {payment.recorded_at
                         ? format(new Date(payment.recorded_at), "dd/MM/yyyy", { locale: fr })
-                        : "—"}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                        : "Date non renseignée"}
+                    </p>
+                  </article>
+                ))}
+              </div>
+
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-white/[0.06] hover:bg-transparent">
+                      <TableHead className="px-5 text-white/40 md:px-6">Reçu</TableHead>
+                      <TableHead className="text-white/40">Type</TableHead>
+                      <TableHead className="text-white/40">Montant</TableHead>
+                      <TableHead className="text-white/40">Statut</TableHead>
+                      <TableHead className="px-5 text-white/40 md:px-6">Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {payments.map((payment) => (
+                      <TableRow key={payment.id} className="border-white/[0.06] hover:bg-white/[0.02]">
+                        <TableCell className="px-5 font-mono text-sm text-white/80 md:px-6">
+                          {payment.receipt_number}
+                        </TableCell>
+                        <TableCell className="text-white/80">
+                          {PAYMENT_TYPE_LABELS[payment.payment_type] ?? payment.payment_type}
+                        </TableCell>
+                        <TableCell className="font-medium text-white/90">
+                          {payment.amount_fcfa.toLocaleString("fr-FR")} FCFA
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="secondary"
+                            className={
+                              payment.status === "confirmed"
+                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                                : "border-white/10 bg-white/[0.06] text-white/70"
+                            }
+                          >
+                            {PAYMENT_STATUS_LABELS[payment.status] ?? payment.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="px-5 text-white/55 md:px-6">
+                          {payment.recorded_at
+                            ? format(new Date(payment.recorded_at), "dd/MM/yyyy", { locale: fr })
+                            : "—"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          )}
         </DashboardPanel>
       )}
     </DashboardPageShell>

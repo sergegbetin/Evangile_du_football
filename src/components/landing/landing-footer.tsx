@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Camera, Heart, Share2, Video } from "lucide-react"
+import { Heart } from "lucide-react"
 import { TournamentLogo } from "@/components/landing/tournament-logo"
 import { TOURNAMENT } from "@/lib/constants"
 
@@ -37,17 +37,6 @@ export function LandingFooter() {
             <p className="mt-2 text-sm text-white/40">
               Tournoi chrétien de football — {TOURNAMENT.edition}
             </p>
-            <div className="mt-6 flex gap-3">
-              {[Camera, Share2, Video].map((Icon, i) => (
-                <span
-                  key={i}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-white/40"
-                  aria-hidden
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-              ))}
-            </div>
           </div>
 
           <div>
@@ -107,10 +96,6 @@ export function LandingFooter() {
             <Heart className="h-3.5 w-3.5 fill-current" />
             Fait pour Sa gloire
           </p>
-          <div className="flex gap-4">
-            <span>Confidentialité</span>
-            <span>Mentions légales</span>
-          </div>
         </div>
       </div>
     </footer>

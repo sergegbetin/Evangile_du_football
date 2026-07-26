@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { TEAM_STATUS_LABELS } from "@/lib/constants"
+import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 
@@ -51,7 +52,7 @@ export function AdminTeamsPanel({ teams }: AdminTeamsPanelProps) {
       )}
 
       {teams.length === 0 ? (
-        <p className="text-muted-foreground">Aucune équipe à traiter</p>
+        <DashboardEmptyState message="Aucune équipe à traiter" />
       ) : (
         teams.map((team) => (
           <Card key={team.id}>

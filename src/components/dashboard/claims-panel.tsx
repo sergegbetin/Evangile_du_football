@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { CLAIM_STATUS_LABELS } from "@/lib/constants"
+import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import type { Claim } from "@/types/database"
@@ -139,7 +140,7 @@ export function ClaimsPanel({
 
       <div className="space-y-3">
         {claims.length === 0 ? (
-          <p className="text-muted-foreground">Aucune réclamation</p>
+          <DashboardEmptyState message="Aucune réclamation" />
         ) : (
           claims.map((claim) => (
             <Card key={claim.id}>

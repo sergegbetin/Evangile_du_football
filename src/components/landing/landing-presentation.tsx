@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Check, Circle, Users } from "lucide-react"
+import { Check, Circle } from "lucide-react"
 import { LANDING_CHECKPOINTS } from "@/lib/landing-data"
 import { TOURNAMENT } from "@/lib/constants"
 import { ScrollReveal } from "@/components/landing/scroll-reveal"
@@ -51,28 +51,6 @@ export function LandingPresentation() {
             <div className="absolute inset-0 bg-gradient-to-t from-[#050608]/60 to-transparent" />
           </div>
 
-          <div className="landing-glass absolute -right-2 top-6 flex items-center gap-2 rounded-full px-4 py-2 md:-right-6">
-            <div className="flex -space-x-2">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#050608] bg-[#d4af37]/20"
-                >
-                  <Users className="h-3.5 w-3.5 text-[#d4af37]" />
-                </div>
-              ))}
-            </div>
-            <span className="text-sm font-semibold text-[#d4af37]">
-              +120 joueurs
-            </span>
-          </div>
-
-          <div className="landing-glass absolute -bottom-4 -left-2 rounded-2xl p-5 md:-left-6">
-            <p className="text-4xl font-bold text-[#d4af37]">98%</p>
-            <p className="mt-1 text-sm text-white/60">
-              Satisfaction des participants
-            </p>
-          </div>
         </ScrollReveal>
       </div>
     </section>

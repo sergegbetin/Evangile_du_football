@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge"
 import { PAYMENT_AMOUNTS } from "@/lib/validations/payment"
 import { TOURNAMENT } from "@/lib/constants"
 import { TEAM_PAYMENT_STATUS_LABELS, type TeamPaymentSummary } from "@/lib/tournament-rules"
+import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 
@@ -166,24 +167,12 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
           <CardTitle>Solde par équipe</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Équipe</TableHead>
-                <TableHead>Payé</TableHead>
-                <TableHead>Solde restant</TableHead>
-                <TableHead>Statut</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {teams.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-muted-foreground">
-                    Aucune équipe validée
-                  </TableCell>
-                </TableRow>
-              ) : (
-                teams.map((team) => {
+          {teams.length === 0 ? (
+            <DashboardEmptyState message="Aucune équipe validée" />
+          ) : (
+            <>
+              <div className="space-y-3 md:hidden">
+                {teams.map((team) => {
                   const summary = teamSummaries[team.id] ?? {
                     totalPaidFcfa: 0,
                     totalExpectedFcfa: TOURNAMENT.totalFeeFcfa,
@@ -191,21 +180,63 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
                     status: "impaye" as const,
                   }
                   return (
-                    <TableRow key={team.id}>
-                      <TableCell className="font-medium">{team.name}</TableCell>
-                      <TableCell>{summary.totalPaidFcfa.toLocaleString("fr-FR")} FCFA</TableCell>
-                      <TableCell>{summary.balanceFcfa.toLocaleString("fr-FR")} FCFA</TableCell>
-                      <TableCell>
+                    <article
+                      key={team.id}
+                      className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="font-medium text-white">{team.name}</p>
                         <Badge variant={summary.status === "paye" ? "default" : "secondary"}>
                           {TEAM_PAYMENT_STATUS_LABELS[summary.status]}
                         </Badge>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                      <p className="mt-2 text-sm text-white/55">
+                        Payé : {summary.totalPaidFcfa.toLocaleString("fr-FR")} FCFA
+                      </p>
+                      <p className="mt-1 text-sm text-white/45">
+                        Solde restant : {summary.balanceFcfa.toLocaleString("fr-FR")} FCFA
+                      </p>
+                    </article>
                   )
-                })
-              )}
-            </TableBody>
-          </Table>
+                })}
+              </div>
+
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Équipe</TableHead>
+                      <TableHead>Payé</TableHead>
+                      <TableHead>Solde restant</TableHead>
+                      <TableHead>Statut</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {teams.map((team) => {
+                      const summary = teamSummaries[team.id] ?? {
+                        totalPaidFcfa: 0,
+                        totalExpectedFcfa: TOURNAMENT.totalFeeFcfa,
+                        balanceFcfa: TOURNAMENT.totalFeeFcfa,
+                        status: "impaye" as const,
+                      }
+                      return (
+                        <TableRow key={team.id}>
+                          <TableCell className="font-medium">{team.name}</TableCell>
+                          <TableCell>{summary.totalPaidFcfa.toLocaleString("fr-FR")} FCFA</TableCell>
+                          <TableCell>{summary.balanceFcfa.toLocaleString("fr-FR")} FCFA</TableCell>
+                          <TableCell>
+                            <Badge variant={summary.status === "paye" ? "default" : "secondary"}>
+                              {TEAM_PAYMENT_STATUS_LABELS[summary.status]}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -214,59 +245,99 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
           <CardTitle>Historique des paiements</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Reçu</TableHead>
-                <TableHead>Référence</TableHead>
-                <TableHead>Équipe</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Montant</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="w-28" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payments.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-muted-foreground">
-                    Aucun paiement
-                  </TableCell>
-                </TableRow>
-              ) : (
-                payments.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-mono text-sm">{p.receipt_number}</TableCell>
-                    <TableCell className="text-sm">{p.reference || "—"}</TableCell>
-                    <TableCell>{p.team?.name ?? "—"}</TableCell>
-                    <TableCell>{TYPE_LABELS[p.payment_type] ?? p.payment_type}</TableCell>
-                    <TableCell>{p.amount_fcfa.toLocaleString("fr-FR")} FCFA</TableCell>
-                    <TableCell>
+          {payments.length === 0 ? (
+            <DashboardEmptyState message="Aucun paiement" />
+          ) : (
+            <>
+              <div className="space-y-3 md:hidden">
+                {payments.map((p) => (
+                  <article
+                    key={p.id}
+                    className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-sm text-white/80">{p.receipt_number}</p>
+                        <p className="mt-1 font-medium text-white">{p.team?.name ?? "—"}</p>
+                      </div>
                       <Badge>{STATUS_LABELS[p.status] ?? p.status}</Badge>
-                    </TableCell>
-                    <TableCell>
+                    </div>
+                    <p className="mt-2 text-sm text-white/55">
+                      {TYPE_LABELS[p.payment_type] ?? p.payment_type}
+                      {p.reference ? ` · ${p.reference}` : ""}
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-[#d4af37]">
+                      {p.amount_fcfa.toLocaleString("fr-FR")} FCFA
+                    </p>
+                    <p className="mt-1 text-sm text-white/45">
                       {p.recorded_at
                         ? format(new Date(p.recorded_at), "dd/MM/yyyy", { locale: fr })
-                        : "—"}
-                    </TableCell>
-                    <TableCell>
-                      {p.status === "pending" && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleCancel(p.id)}
-                        >
-                          Annuler
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                        : "Date non renseignée"}
+                    </p>
+                    {p.status === "pending" && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="mt-3"
+                        onClick={() => handleCancel(p.id)}
+                      >
+                        Annuler
+                      </Button>
+                    )}
+                  </article>
+                ))}
+              </div>
+
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Reçu</TableHead>
+                      <TableHead>Référence</TableHead>
+                      <TableHead>Équipe</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Montant</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="w-28" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {payments.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-mono text-sm">{p.receipt_number}</TableCell>
+                        <TableCell className="text-sm">{p.reference || "—"}</TableCell>
+                        <TableCell>{p.team?.name ?? "—"}</TableCell>
+                        <TableCell>{TYPE_LABELS[p.payment_type] ?? p.payment_type}</TableCell>
+                        <TableCell>{p.amount_fcfa.toLocaleString("fr-FR")} FCFA</TableCell>
+                        <TableCell>
+                          <Badge>{STATUS_LABELS[p.status] ?? p.status}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          {p.recorded_at
+                            ? format(new Date(p.recorded_at), "dd/MM/yyyy", { locale: fr })
+                            : "—"}
+                        </TableCell>
+                        <TableCell>
+                          {p.status === "pending" && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCancel(p.id)}
+                            >
+                              Annuler
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

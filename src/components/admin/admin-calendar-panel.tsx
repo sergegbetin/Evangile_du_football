@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { TOURNAMENT } from "@/lib/constants"
+import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
 import { getJoinedName } from "@/lib/utils"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -122,7 +123,7 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
       <div className="space-y-3">
         <h2 className="font-semibold">Matchs programmés</h2>
         {matches.length === 0 ? (
-          <p className="text-muted-foreground">Aucun match</p>
+          <DashboardEmptyState message="Aucun match" />
         ) : (
           matches.map((match) => (
             <Card key={match.id}>

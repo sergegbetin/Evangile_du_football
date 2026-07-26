@@ -88,7 +88,7 @@ export const LANDING_PARTNERS = [
 ] as const
 
 /** Date cible du compte à rebours : match d'ouverture */
-export const COUNTDOWN_TARGET = new Date("2026-07-26T15:00:00+01:00")
+export const COUNTDOWN_TARGET = new Date("2026-07-26T16:00:00+01:00")
 
 export const TIMELINE_EVENTS = [
   {

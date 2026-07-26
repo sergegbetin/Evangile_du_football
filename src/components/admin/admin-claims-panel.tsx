@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CLAIM_STATUS_LABELS } from "@/lib/constants"
+import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 
@@ -50,7 +51,7 @@ export function AdminClaimsPanel({ claims }: AdminClaimsPanelProps) {
       )}
 
       {claims.length === 0 ? (
-        <p className="text-muted-foreground">Aucune réclamation</p>
+        <DashboardEmptyState message="Aucune réclamation" />
       ) : (
         claims.map((claim) => (
           <Card key={claim.id}>

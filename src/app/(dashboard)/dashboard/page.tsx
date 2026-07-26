@@ -75,7 +75,7 @@ export default async function DashboardPage() {
               </Badge>
             </>
           ) : (
-            <p className="text-sm leading-relaxed text-white/50">
+            <p className="text-sm leading-relaxed text-white/45">
               Aucune équipe inscrite. Commencez par enregistrer votre équipe.
             </p>
           )}

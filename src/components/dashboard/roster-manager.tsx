@@ -25,6 +25,7 @@ import {
 import { MEMBER_TYPE_LABELS, TOURNAMENT } from "@/lib/constants"
 import { PLAYER_POSITIONS } from "@/lib/validations/roster"
 import { getRosterLockMessage } from "@/lib/tournament-rules"
+import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
 import type { RosterMember, Team } from "@/types/database"
 
 interface RosterManagerProps {
@@ -152,51 +153,43 @@ export function RosterManager({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-14">Photo</TableHead>
-                <TableHead>Nom</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Poste</TableHead>
-                <TableHead>N°</TableHead>
-                <TableHead>Téléphone</TableHead>
-                {canEdit && <TableHead className="w-36" />}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {members.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-muted-foreground">
-                    Aucun membre enregistré
-                  </TableCell>
-                </TableRow>
-              ) : (
-                members.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell>
+          {members.length === 0 ? (
+            <DashboardEmptyState message="Aucun membre enregistré" />
+          ) : (
+            <>
+              <div className="space-y-3 md:hidden">
+                {members.map((member) => (
+                  <article
+                    key={member.id}
+                    className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4"
+                  >
+                    <div className="flex items-start gap-3">
                       {member.photo_url ? (
                         <Image
                           src={member.photo_url}
                           alt={member.full_name}
-                          width={36}
-                          height={36}
-                          className="h-9 w-9 rounded-full object-cover"
+                          width={40}
+                          height={40}
+                          className="h-10 w-10 shrink-0 rounded-full object-cover"
                           unoptimized
                         />
                       ) : (
-                        <div className="h-9 w-9 rounded-full bg-muted" aria-hidden="true" />
+                        <div className="h-10 w-10 shrink-0 rounded-full bg-muted" aria-hidden />
                       )}
-                    </TableCell>
-                    <TableCell className="font-medium">{member.full_name}</TableCell>
-                    <TableCell>
-                      {MEMBER_TYPE_LABELS[member.member_type] ?? member.member_type}
-                    </TableCell>
-                    <TableCell>{member.position ?? "—"}</TableCell>
-                    <TableCell>{member.jersey_number ?? "—"}</TableCell>
-                    <TableCell>{member.phone ?? "—"}</TableCell>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-white">{member.full_name}</p>
+                        <p className="mt-1 text-sm text-white/50">
+                          {MEMBER_TYPE_LABELS[member.member_type] ?? member.member_type}
+                          {member.position ? ` · ${member.position}` : ""}
+                          {member.jersey_number ? ` · #${member.jersey_number}` : ""}
+                        </p>
+                        {member.phone && (
+                          <p className="mt-1 text-sm text-white/45">{member.phone}</p>
+                        )}
+                      </div>
+                    </div>
                     {canEdit && (
-                      <TableCell className="space-x-1">
+                      <div className="mt-3 flex gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -213,13 +206,76 @@ export function RosterManager({
                         >
                           Retirer
                         </Button>
-                      </TableCell>
+                      </div>
                     )}
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                  </article>
+                ))}
+              </div>
+
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-14">Photo</TableHead>
+                      <TableHead>Nom</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Poste</TableHead>
+                      <TableHead>N°</TableHead>
+                      <TableHead>Téléphone</TableHead>
+                      {canEdit && <TableHead className="w-36" />}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {members.map((member) => (
+                      <TableRow key={member.id}>
+                        <TableCell>
+                          {member.photo_url ? (
+                            <Image
+                              src={member.photo_url}
+                              alt={member.full_name}
+                              width={36}
+                              height={36}
+                              className="h-9 w-9 rounded-full object-cover"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="h-9 w-9 rounded-full bg-muted" aria-hidden="true" />
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">{member.full_name}</TableCell>
+                        <TableCell>
+                          {MEMBER_TYPE_LABELS[member.member_type] ?? member.member_type}
+                        </TableCell>
+                        <TableCell>{member.position ?? "—"}</TableCell>
+                        <TableCell>{member.jersey_number ?? "—"}</TableCell>
+                        <TableCell>{member.phone ?? "—"}</TableCell>
+                        {canEdit && (
+                          <TableCell className="space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              type="button"
+                              onClick={() => startEdit(member)}
+                            >
+                              Modifier
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              type="button"
+                              onClick={() => handleRemove(member.id)}
+                            >
+                              Retirer
+                            </Button>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
