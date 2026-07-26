@@ -1,7 +1,8 @@
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Calendar, MapPin } from "lucide-react"
+import { Calendar, Clock, MapPin } from "lucide-react"
 import type { MatchWithTeams } from "@/types/database"
+import { getPresenceRequiredMessage } from "@/lib/tournament-rules"
 
 const statusLabels: Record<string, { label: string; className: string }> = {
   scheduled: { label: "Programmé", className: "text-white/50 bg-white/5" },
@@ -105,6 +106,10 @@ export function MatchList({
                 {match.venue}
               </span>
             </div>
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-[#d4af37]/80">
+              <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              {getPresenceRequiredMessage(match.scheduled_at)}
+            </p>
           </article>
         )
       })}

@@ -1,8 +1,10 @@
-import { CreditCard, Home, MessageSquare, Shield } from "lucide-react"
+import { CreditCard, Clock, Home, MessageSquare, Shield } from "lucide-react"
 import { requireAuth, isCommitteeRole } from "@/lib/auth"
 import { getCoachTeam } from "@/lib/actions/teams"
 import { getCoachPayments } from "@/lib/actions/payments"
 import { getCoachClaims } from "@/lib/actions/claims"
+import { getCoachUpcomingMatch } from "@/lib/actions/matches"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { ButtonLink } from "@/components/ui/button-link"
 import { DashboardPageHeader } from "@/components/layout/dashboard-page-header"
@@ -10,7 +12,13 @@ import { DashboardPageShell } from "@/components/layout/dashboard-page-shell"
 import { DashboardPanel } from "@/components/layout/dashboard-panel"
 import { DashboardStatCard } from "@/components/layout/dashboard-stat-card"
 import { TEAM_STATUS_LABELS, TOURNAMENT } from "@/lib/constants"
-import { computeTeamPaymentSummary, TEAM_PAYMENT_STATUS_LABELS } from "@/lib/tournament-rules"
+import {
+  computeTeamPaymentSummary,
+  getPresenceRequiredMessage,
+  TEAM_PAYMENT_STATUS_LABELS,
+} from "@/lib/tournament-rules"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 
 export const metadata = {
   title: "Tableau de bord",
@@ -24,6 +32,7 @@ export default async function DashboardPage() {
   const isCommittee = isCommitteeRole(profile.role)
   const paymentSummary = computeTeamPaymentSummary(payments)
   const pendingClaims = claims.filter((c) => c.status !== "decided").length
+  const upcomingMatch = team ? await getCoachUpcomingMatch(team.id) : null
 
   return (
     <DashboardPageShell className="space-y-8">
@@ -31,6 +40,22 @@ export default async function DashboardPage() {
         title={`Bonjour, ${profile.full_name.split(" ")[0]}`}
         description={`Bienvenue sur la plateforme ${TOURNAMENT.name}.`}
       />
+
+      {upcomingMatch && (
+        <Alert className="border-[#d4af37]/30 bg-[#d4af37]/10 text-white">
+          <Clock className="text-[#d4af37]" aria-hidden />
+          <AlertTitle className="text-white">Prochain match</AlertTitle>
+          <AlertDescription className="text-white/80">
+            <p>{getPresenceRequiredMessage(upcomingMatch.scheduled_at)}</p>
+            <p className="mt-1 text-sm text-white/55">
+              {format(new Date(upcomingMatch.scheduled_at), "EEEE d MMMM yyyy 'à' HH'h'mm", {
+                locale: fr,
+              })}
+              {upcomingMatch.round ? ` — ${upcomingMatch.round}` : ""}
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {isCommittee && (
         <DashboardPanel

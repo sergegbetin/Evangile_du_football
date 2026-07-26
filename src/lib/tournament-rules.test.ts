@@ -5,6 +5,8 @@ import {
   computeTeamPaymentSummary,
   computeTotalMatchCount,
   getClaimDeadlineMessage,
+  getPresenceRequiredAt,
+  getPresenceRequiredMessage,
   getRosterLockMessage,
   isClaimSubmissionAllowed,
   isRosterLocked,
@@ -123,6 +125,38 @@ describe("isClaimSubmissionAllowed", () => {
 describe("getClaimDeadlineMessage", () => {
   it("mentions the configured claim deadline in hours", () => {
     expect(getClaimDeadlineMessage()).toContain(String(TOURNAMENT.claimDeadlineHours))
+  })
+})
+
+describe("getPresenceRequiredAt", () => {
+  it("returns the configured number of hours before kickoff", () => {
+    const scheduledAt = "2026-07-26T16:00:00.000Z"
+    const presenceAt = getPresenceRequiredAt(scheduledAt)
+
+    expect(presenceAt.getTime()).toBe(
+      new Date(scheduledAt).getTime()
+        - TOURNAMENT.presenceHoursBeforeMatch * 60 * 60 * 1000
+    )
+  })
+})
+
+describe("getPresenceRequiredMessage", () => {
+  it("formats the presence reminder in French with hour times", () => {
+    const message = getPresenceRequiredMessage("2026-07-26T16:00:00.000Z")
+
+    expect(message).toMatch(
+      /^Présence requise à \d{2}h\d{2} pour le match de \d{2}h\d{2}$/
+    )
+  })
+
+  it("reflects the configured presence window before kickoff", () => {
+    const scheduledAt = "2026-07-26T16:00:00.000Z"
+    const kickoff = new Date(scheduledAt)
+    const presenceAt = getPresenceRequiredAt(scheduledAt)
+
+    expect(kickoff.getTime() - presenceAt.getTime()).toBe(
+      TOURNAMENT.presenceHoursBeforeMatch * 60 * 60 * 1000
+    )
   })
 })
 

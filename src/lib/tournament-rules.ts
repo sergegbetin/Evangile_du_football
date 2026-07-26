@@ -1,3 +1,5 @@
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 import { TOURNAMENT } from "@/lib/constants"
 import type { Match, Payment, Team } from "@/types/database"
 
@@ -106,6 +108,25 @@ export function isClaimSubmissionAllowed(
 
 export function getClaimDeadlineMessage(): string {
   return `Les réclamations doivent être déposées dans les ${TOURNAMENT.claimDeadlineHours} heures suivant la fin du match concerné.`
+}
+
+function formatTournamentHourTime(date: Date): string {
+  return format(date, "HH'h'mm", { locale: fr })
+}
+
+/** Presence check-in time: `presenceHoursBeforeMatch` before kickoff (reglement). */
+export function getPresenceRequiredAt(scheduledAt: string): Date {
+  return new Date(
+    new Date(scheduledAt).getTime()
+      - TOURNAMENT.presenceHoursBeforeMatch * 60 * 60 * 1000
+  )
+}
+
+export function getPresenceRequiredMessage(scheduledAt: string): string {
+  const matchAt = new Date(scheduledAt)
+  const presenceAt = getPresenceRequiredAt(scheduledAt)
+
+  return `Présence requise à ${formatTournamentHourTime(presenceAt)} pour le match de ${formatTournamentHourTime(matchAt)}`
 }
 
 export type TeamPaymentStatus = "impaye" | "partiel" | "paye"

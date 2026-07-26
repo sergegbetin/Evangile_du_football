@@ -39,6 +39,44 @@ export async function getAllMatches(): Promise<MatchWithTeams[]> {
   return rows
 }
 
+const matchWithTeamsSelect =
+  "*, home_team:teams!matches_home_team_id_fkey(name), away_team:teams!matches_away_team_id_fkey(name)"
+
+export async function getCoachUpcomingMatch(
+  teamId: string
+): Promise<MatchWithTeams | null> {
+  if (!isSupabaseConfigured()) {
+    const now = Date.now()
+    return (
+      getDemoMatches()
+        .filter(
+          (match) =>
+            (match.home_team_id === teamId || match.away_team_id === teamId)
+            && match.status === "scheduled"
+            && new Date(match.scheduled_at).getTime() > now
+        )
+        .sort(
+          (a, b) =>
+            new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
+        )[0] ?? null
+    )
+  }
+
+  const supabase = await createClient()
+
+  const { data } = await supabase
+    .from("matches")
+    .select(matchWithTeamsSelect)
+    .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
+    .eq("status", "scheduled")
+    .gt("scheduled_at", new Date().toISOString())
+    .order("scheduled_at", { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  return (data as MatchWithTeams | null) ?? null
+}
+
 export async function getStandings() {
   if (!isSupabaseConfigured()) return getDemoStandings()
 
