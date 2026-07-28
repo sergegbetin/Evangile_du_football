@@ -3,12 +3,13 @@
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { reviewTeam } from "@/lib/actions/teams"
+import { reassignTeamCoach, reviewTeam, type UnassignedCoach } from "@/lib/actions/teams"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { MEMBER_TYPE_LABELS, TEAM_STATUS_LABELS } from "@/lib/constants"
 import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
 import { format } from "date-fns"
@@ -16,17 +17,27 @@ import { fr } from "date-fns/locale"
 
 import type { TeamWithCoachAndRoster } from "@/types/database"
 
-interface AdminTeamsPanelProps {
-  teams: TeamWithCoachAndRoster[]
+const PLACEHOLDER_EMAIL_SUFFIX = "@placeholder.kogoh.bj"
+
+function isPlaceholderCoach(email: string | null | undefined): boolean {
+  return Boolean(email?.endsWith(PLACEHOLDER_EMAIL_SUFFIX))
 }
 
-export function AdminTeamsPanel({ teams }: AdminTeamsPanelProps) {
+interface AdminTeamsPanelProps {
+  teams: TeamWithCoachAndRoster[]
+  unassignedCoaches: UnassignedCoach[]
+}
+
+export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelProps) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [rejectingId, setRejectingId] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [reason, setReason] = useState("")
+  const [reassigningId, setReassigningId] = useState<string | null>(null)
+  const [selectedCoachId, setSelectedCoachId] = useState("")
+  const [isReassignPending, setIsReassignPending] = useState(false)
 
   async function handleReview(teamId: string, action: "approve" | "reject") {
     setError(null)
@@ -46,6 +57,29 @@ export function AdminTeamsPanel({ teams }: AdminTeamsPanelProps) {
       setSuccess(action === "approve" ? "Équipe validée" : "Dossier refusé")
       router.refresh()
     }
+  }
+
+  async function handleReassign(teamId: string, teamName: string) {
+    if (!selectedCoachId) {
+      setError("Sélectionnez un compte coach à rattacher")
+      return
+    }
+    setError(null)
+    setSuccess(null)
+    setIsReassignPending(true)
+    const formData = new FormData()
+    formData.set("teamId", teamId)
+    formData.set("newCoachId", selectedCoachId)
+    const result = await reassignTeamCoach(formData)
+    setIsReassignPending(false)
+    if (!result.success) {
+      setError(result.error)
+      return
+    }
+    setReassigningId(null)
+    setSelectedCoachId("")
+    setSuccess(`Coach rattaché à ${teamName}`)
+    router.refresh()
   }
 
   return (
@@ -74,7 +108,14 @@ export function AdminTeamsPanel({ teams }: AdminTeamsPanelProps) {
               <CardHeader>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <CardTitle className="text-lg">{team.name}</CardTitle>
-                  <Badge>{TEAM_STATUS_LABELS[team.status] ?? team.status}</Badge>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {isPlaceholderCoach(team.coach?.email) && (
+                      <Badge variant="outline" className="border-amber-500/40 text-amber-400">
+                        Compte placeholder
+                      </Badge>
+                    )}
+                    <Badge>{TEAM_STATUS_LABELS[team.status] ?? team.status}</Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -171,6 +212,63 @@ export function AdminTeamsPanel({ teams }: AdminTeamsPanelProps) {
                         ))
                       )}
                     </ul>
+                  )}
+                </div>
+
+                <div className="pt-1">
+                  {reassigningId === team.id ? (
+                    <div className="flex w-full flex-wrap items-center gap-2">
+                      <Select
+                        value={selectedCoachId || undefined}
+                        onValueChange={(v) => setSelectedCoachId(v ?? "")}
+                      >
+                        <SelectTrigger className="min-w-56">
+                          <SelectValue placeholder="Choisir un compte coach" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {unassignedCoaches.map((coach) => (
+                            <SelectItem key={coach.id} value={coach.id}>
+                              {coach.full_name} ({coach.email})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        size="sm"
+                        disabled={isReassignPending || !selectedCoachId}
+                        onClick={() => handleReassign(team.id, team.name)}
+                      >
+                        {isReassignPending ? "Rattachement…" : "Confirmer"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setReassigningId(null)
+                          setSelectedCoachId("")
+                        }}
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={unassignedCoaches.length === 0}
+                      onClick={() => {
+                        setReassigningId(team.id)
+                        setSelectedCoachId("")
+                      }}
+                    >
+                      Rattacher un coach
+                    </Button>
+                  )}
+                  {unassignedCoaches.length === 0 && reassigningId !== team.id && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Aucun compte coach sans équipe — demandez au coach de créer son
+                      compte via Inscription.
+                    </p>
                   )}
                 </div>
 

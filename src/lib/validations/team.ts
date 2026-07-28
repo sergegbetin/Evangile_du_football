@@ -25,6 +25,12 @@ export const teamReviewSchema = z.object({
   rejectionReason: z.string().optional(),
 })
 
+export const teamReassignSchema = z.object({
+  teamId: z.string().uuid("Identifiant d'équipe invalide"),
+  newCoachId: z.string().uuid("Identifiant de coach invalide"),
+})
+
 export type TeamRegistrationInput = z.infer<typeof teamRegistrationSchema>
 export type TeamSubmitInput = z.infer<typeof teamSubmitSchema>
 export type TeamReviewInput = z.infer<typeof teamReviewSchema>
+export type TeamReassignInput = z.infer<typeof teamReassignSchema>

@@ -113,8 +113,12 @@ export async function addRosterMember(
   const photo = formData.get("photo")
   const hasPhoto = photo instanceof File && photo.size > 0
 
-  if (parsed.data.member_type === "player" && !hasPhoto) {
-    return { success: false, error: "Une photo est obligatoire pour chaque joueur" }
+  // Décision comité (anti-fraude) : photo d'identité pour tout l'effectif.
+  if (!hasPhoto) {
+    return {
+      success: false,
+      error: "Une photo est obligatoire pour chaque membre de l'effectif",
+    }
   }
 
   const supabase = await createClient()
@@ -202,8 +206,12 @@ export async function updateRosterMember(
     photoUrl = uploaded.photoUrl
   }
 
-  if (parsed.data.member_type === "player" && !photoUrl) {
-    return { success: false, error: "Une photo est obligatoire pour chaque joueur" }
+  // Décision comité (anti-fraude) : photo d'identité pour tout l'effectif.
+  if (!photoUrl) {
+    return {
+      success: false,
+      error: "Une photo est obligatoire pour chaque membre de l'effectif",
+    }
   }
 
   const { data, error } = await supabase

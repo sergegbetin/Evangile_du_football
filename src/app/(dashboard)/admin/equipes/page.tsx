@@ -1,5 +1,5 @@
 import { requireCommittee } from "@/lib/auth"
-import { getSubmittedTeamsWithRoster } from "@/lib/actions/teams"
+import { getSubmittedTeamsWithRoster, getUnassignedCoaches } from "@/lib/actions/teams"
 import { AdminTeamsPanel } from "@/components/admin/admin-teams-panel"
 import { DashboardPageHeader } from "@/components/layout/dashboard-page-header"
 import { DashboardPageShell } from "@/components/layout/dashboard-page-shell"
@@ -11,17 +11,20 @@ export const metadata = {
 
 export default async function AdminEquipesPage() {
   await requireCommittee()
-  const teams = await getSubmittedTeamsWithRoster()
+  const [teams, unassignedCoaches] = await Promise.all([
+    getSubmittedTeamsWithRoster(),
+    getUnassignedCoaches(),
+  ])
 
   return (
     <DashboardPageShell>
       <DashboardPageHeader
         section="admin"
         title="Validation des équipes"
-        description="Approuvez ou refusez les dossiers soumis par les coaches. Consultez l'effectif avant de valider."
+        description="Approuvez ou refusez les dossiers soumis par les coaches. Rattachez chaque équipe à son vrai compte coach."
       />
       <DashboardPanel>
-        <AdminTeamsPanel teams={teams} />
+        <AdminTeamsPanel teams={teams} unassignedCoaches={unassignedCoaches} />
       </DashboardPanel>
     </DashboardPageShell>
   )

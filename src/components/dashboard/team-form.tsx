@@ -15,13 +15,13 @@ import type { Team } from "@/types/database"
 interface TeamFormProps {
   team: Team | null
   playerCount?: number
-  playersMissingPhoto?: number
+  membersMissingPhoto?: number
 }
 
 export function TeamForm({
   team,
   playerCount = 0,
-  playersMissingPhoto = 0,
+  membersMissingPhoto = 0,
 }: TeamFormProps) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
@@ -32,7 +32,7 @@ export function TeamForm({
   const canSubmit = team && ["draft", "rejected"].includes(team.status)
   const isPendingReview = team?.status === "submitted"
   const hasEnoughPlayers = playerCount >= TOURNAMENT.minPlayersToSubmit
-  const rosterReady = hasEnoughPlayers && playersMissingPhoto === 0
+  const rosterReady = hasEnoughPlayers && membersMissingPhoto === 0
 
   async function handleSave(formData: FormData) {
     setIsLoading(true)
@@ -184,8 +184,8 @@ export function TeamForm({
         <div className="space-y-3 border-t border-white/[0.06] pt-4">
           <p className="text-sm text-white/55">
             Effectif : {playerCount}/{TOURNAMENT.minPlayersToSubmit} joueurs minimum
-            {playersMissingPhoto > 0
-              ? ` · ${playersMissingPhoto} sans photo`
+            {membersMissingPhoto > 0
+              ? ` · ${membersMissingPhoto} membre(s) sans photo`
               : hasEnoughPlayers
                 ? " · photos OK"
                 : ""}
@@ -206,8 +206,8 @@ export function TeamForm({
             </Button>
             {!rosterReady && (
               <p className="text-sm text-white/45">
-                Ajoutez au moins {TOURNAMENT.minPlayersToSubmit} joueurs avec photo
-                d&apos;identité.
+                Ajoutez au moins {TOURNAMENT.minPlayersToSubmit} joueurs — photo
+                d&apos;identité obligatoire pour chaque membre de l&apos;effectif.
               </p>
             )}
           </div>

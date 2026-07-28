@@ -58,7 +58,9 @@ export function isRosterLocked(
   team: Pick<Team, "status">,
   firstMatchAt: string | null
 ): boolean {
-  if (!["draft", "rejected", "submitted"].includes(team.status)) {
+  // Une équipe approved reste éditable : seul le verrou temporel
+  // (24h avant son premier match) ferme l'effectif.
+  if (!["draft", "rejected", "submitted", "approved"].includes(team.status)) {
     return true
   }
 

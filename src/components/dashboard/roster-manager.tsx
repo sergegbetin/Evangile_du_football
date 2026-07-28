@@ -175,7 +175,10 @@ export function RosterManager({
                           unoptimized
                         />
                       ) : (
-                        <div className="h-10 w-10 shrink-0 rounded-full bg-muted" aria-hidden />
+                        <div
+                          className="h-10 w-10 shrink-0 rounded-full border border-amber-500/50 bg-muted"
+                          aria-hidden
+                        />
                       )}
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-white">{member.full_name}</p>
@@ -186,6 +189,9 @@ export function RosterManager({
                         </p>
                         {member.phone && (
                           <p className="mt-1 text-sm text-white/45">{member.phone}</p>
+                        )}
+                        {!member.photo_url && (
+                          <p className="mt-1 text-sm text-amber-400">Photo manquante</p>
                         )}
                       </div>
                     </div>
@@ -240,7 +246,11 @@ export function RosterManager({
                               unoptimized
                             />
                           ) : (
-                            <div className="h-9 w-9 rounded-full bg-muted" aria-hidden="true" />
+                            <div
+                              className="h-9 w-9 rounded-full border border-amber-500/50 bg-muted"
+                              title="Photo manquante"
+                              aria-label="Photo manquante"
+                            />
                           )}
                         </TableCell>
                         <TableCell className="font-medium">{member.full_name}</TableCell>
@@ -356,19 +366,17 @@ export function RosterManager({
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="photo">
-                  Photo{" "}
-                  {memberType === "player"
-                    ? editingMember?.photo_url
-                      ? "(laisser vide pour conserver)"
-                      : "(obligatoire pour les joueurs)"
-                    : "(optionnelle)"}
+                  Photo d&apos;identité{" "}
+                  {editingMember?.photo_url
+                    ? "(laisser vide pour conserver)"
+                    : "(obligatoire pour chaque membre)"}
                 </Label>
                 <Input
                   id="photo"
                   name="photo"
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
-                  required={memberType === "player" && !editingMember?.photo_url}
+                  required={!editingMember?.photo_url}
                 />
               </div>
               <div className="flex flex-wrap gap-2 md:col-span-2">

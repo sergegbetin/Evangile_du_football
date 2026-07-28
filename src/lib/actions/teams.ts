@@ -14,11 +14,13 @@ import {
   teamRegistrationSchema,
   teamSubmitSchema,
   teamReviewSchema,
+  teamReassignSchema,
 } from "@/lib/validations/team"
 import { logAudit } from "@/lib/actions/audit"
 import { TOURNAMENT } from "@/lib/constants"
 import type {
   ActionResult,
+  Profile,
   RosterMember,
   Team,
   TeamWithCoach,
@@ -185,7 +187,9 @@ export async function submitTeam(
   if (rosterError) return { success: false, error: rosterError.message }
 
   const players = (members ?? []).filter((m) => m.member_type === "player")
-  const playersWithoutPhoto = players.filter((m) => !m.photo_url)
+  // Décision comité (anti-fraude) : photo d'identité pour tout l'effectif,
+  // pas seulement les joueurs.
+  const membersWithoutPhoto = (members ?? []).filter((m) => !m.photo_url)
 
   if (players.length < TOURNAMENT.minPlayersToSubmit) {
     return {
@@ -194,10 +198,10 @@ export async function submitTeam(
     }
   }
 
-  if (playersWithoutPhoto.length > 0) {
+  if (membersWithoutPhoto.length > 0) {
     return {
       success: false,
-      error: `${playersWithoutPhoto.length} joueur(s) sans photo — la photo d'identité est obligatoire`,
+      error: `${membersWithoutPhoto.length} membre(s) sans photo — la photo d'identité est obligatoire pour tout l'effectif`,
     }
   }
 
@@ -348,6 +352,99 @@ export async function getSubmittedTeamsWithRoster(): Promise<
     const bAt = b.submitted_at ? new Date(b.submitted_at).getTime() : 0
     return bAt - aAt
   })
+}
+
+export type UnassignedCoach = Pick<Profile, "id" | "full_name" | "email" | "phone">
+
+/** Profils rôle coach sans équipe — candidats au rattachement par le comité. */
+export async function getUnassignedCoaches(): Promise<UnassignedCoach[]> {
+  if (isPreviewMode()) return []
+
+  await requireCommittee()
+  const supabase = await createClient()
+
+  const [{ data: coaches, error: coachesError }, { data: teams, error: teamsError }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, full_name, email, phone")
+        .eq("role", "coach")
+        .order("full_name"),
+      supabase.from("teams").select("coach_id"),
+    ])
+
+  if (coachesError || teamsError) return []
+
+  const assignedCoachIds = new Set((teams ?? []).map((t) => t.coach_id))
+  return ((coaches ?? []) as UnassignedCoach[]).filter(
+    (coach) => !assignedCoachIds.has(coach.id)
+  )
+}
+
+/** Rattache une équipe existante à un vrai compte coach (comité uniquement). */
+export async function reassignTeamCoach(
+  formData: FormData
+): Promise<ActionResult> {
+  if (isPreviewMode()) return { success: false, error: PREVIEW_MUTATION_ERROR }
+
+  const profile = await requireCommittee()
+  const parsed = teamReassignSchema.safeParse({
+    teamId: formData.get("teamId"),
+    newCoachId: formData.get("newCoachId"),
+  })
+
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Données invalides" }
+  }
+
+  const supabase = await createClient()
+
+  const { data: newCoach } = await supabase
+    .from("profiles")
+    .select("id, role")
+    .eq("id", parsed.data.newCoachId)
+    .maybeSingle()
+
+  if (!newCoach || newCoach.role !== "coach") {
+    return { success: false, error: "Ce compte n'est pas un compte coach" }
+  }
+
+  const { data: existingTeam } = await supabase
+    .from("teams")
+    .select("id")
+    .eq("coach_id", parsed.data.newCoachId)
+    .maybeSingle()
+
+  if (existingTeam) {
+    return { success: false, error: "Ce coach est déjà rattaché à une équipe" }
+  }
+
+  const { data: updated, error } = await supabase
+    .from("teams")
+    .update({ coach_id: parsed.data.newCoachId })
+    .eq("id", parsed.data.teamId)
+    .select("id, name")
+    .maybeSingle()
+
+  if (error) {
+    if (error.code === "23505") {
+      return { success: false, error: "Ce coach est déjà rattaché à une équipe" }
+    }
+    return { success: false, error: error.message }
+  }
+
+  if (!updated) {
+    return { success: false, error: "Équipe introuvable" }
+  }
+
+  await logAudit("team.coach_reassigned", "teams", parsed.data.teamId, {
+    by: profile.id,
+    new_coach_id: parsed.data.newCoachId,
+  })
+  revalidatePath("/admin/equipes")
+  revalidatePath("/dashboard/equipe")
+  revalidatePath("/dashboard")
+  return { success: true }
 }
 
 export async function getApprovedTeams(): Promise<Team[]> {

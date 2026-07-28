@@ -17,7 +17,8 @@ const faqs = [
           Inscription
         </Link>
         , renseignez votre équipe et un effectif d’au moins{" "}
-        {TOURNAMENT.minPlayersToSubmit} joueurs avec photo, puis soumettez le dossier au comité.
+        {TOURNAMENT.minPlayersToSubmit} joueurs — photo d’identité obligatoire pour chaque
+        membre (joueurs, coach, staff) — puis soumettez le dossier au comité.
       </>
     ),
   },

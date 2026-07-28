@@ -13,7 +13,8 @@ export default async function EquipePage() {
   const team = await getCoachTeam()
   const members = team ? await getTeamRoster(team.id) : []
   const players = members.filter((m) => m.member_type === "player")
-  const playersMissingPhoto = players.filter((m) => !m.photo_url).length
+  // Décision comité : la photo est requise pour tout l'effectif.
+  const membersMissingPhoto = members.filter((m) => !m.photo_url).length
 
   return (
     <DashboardPageShell>
@@ -25,7 +26,7 @@ export default async function EquipePage() {
         <TeamForm
           team={team}
           playerCount={players.length}
-          playersMissingPhoto={playersMissingPhoto}
+          membersMissingPhoto={membersMissingPhoto}
         />
       </DashboardPanel>
     </DashboardPageShell>

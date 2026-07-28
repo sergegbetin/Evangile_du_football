@@ -25,14 +25,11 @@ describe("computeTotalMatchCount", () => {
 })
 
 describe("isRosterLocked", () => {
-  it("locks the roster once the team is approved", () => {
-    expect(isRosterLocked({ status: "approved" }, null)).toBe(true)
-  })
-
-  it("keeps the roster open for draft, rejected, and submitted teams with no match", () => {
+  it("keeps the roster open for all statuses when no match is scheduled", () => {
     expect(isRosterLocked({ status: "draft" }, null)).toBe(false)
     expect(isRosterLocked({ status: "rejected" }, null)).toBe(false)
     expect(isRosterLocked({ status: "submitted" }, null)).toBe(false)
+    expect(isRosterLocked({ status: "approved" }, null)).toBe(false)
   })
 
   it("locks 24h before the first scheduled match", () => {
@@ -45,6 +42,20 @@ describe("isRosterLocked", () => {
 
     expect(isRosterLocked({ status: "draft" }, matchInTwelveHours)).toBe(true)
     expect(isRosterLocked({ status: "draft" }, matchInTwoDays)).toBe(false)
+
+    vi.useRealTimers()
+  })
+
+  it("keeps an approved team editable until 24h before its first match", () => {
+    const now = new Date("2026-07-25T12:00:00.000Z")
+    vi.useFakeTimers()
+    vi.setSystemTime(now)
+
+    const matchInTwelveHours = new Date(now.getTime() + 12 * 60 * 60 * 1000).toISOString()
+    const matchInTwoDays = new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString()
+
+    expect(isRosterLocked({ status: "approved" }, matchInTwoDays)).toBe(false)
+    expect(isRosterLocked({ status: "approved" }, matchInTwelveHours)).toBe(true)
 
     vi.useRealTimers()
   })
