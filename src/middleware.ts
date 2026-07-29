@@ -5,6 +5,13 @@ import { isPreviewMode } from "@/lib/preview-mode"
 
 const protectedPrefixes = ["/dashboard", "/admin"]
 
+const coachOnlyPrefixes = [
+  "/dashboard/equipe",
+  "/dashboard/effectif",
+  "/dashboard/paiements",
+  "/dashboard/reclamations",
+]
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isProtected = protectedPrefixes.some((prefix) =>
@@ -36,19 +43,31 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  if (pathname.startsWith("/admin")) {
+  const needsRoleCheck =
+    pathname.startsWith("/admin")
+    || coachOnlyPrefixes.some((prefix) => pathname.startsWith(prefix))
+
+  if (needsRoleCheck) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single()
 
-    if (
-      !profile ||
-      !["committee", "super_admin"].includes(profile.role)
-    ) {
+    if (pathname.startsWith("/admin")) {
+      if (
+        !profile ||
+        !["committee", "super_admin"].includes(profile.role)
+      ) {
+        const url = request.nextUrl.clone()
+        url.pathname = "/dashboard"
+        return NextResponse.redirect(url)
+      }
+    } else if (profile && profile.role !== "coach") {
       const url = request.nextUrl.clone()
-      url.pathname = "/dashboard"
+      url.pathname = ["committee", "super_admin"].includes(profile.role)
+        ? "/admin/equipes"
+        : "/dashboard"
       return NextResponse.redirect(url)
     }
   }

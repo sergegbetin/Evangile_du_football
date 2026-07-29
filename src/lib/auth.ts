@@ -6,9 +6,9 @@ import {
   PREVIEW_COMMITTEE_PROFILE,
 } from "@/lib/demo-data"
 import type { Profile, UserRole } from "@/types/database"
-import { isCommitteeRole, isStaffRole } from "@/lib/roles"
+import { isCoachRole, isCommitteeRole, isStaffRole } from "@/lib/roles"
 
-export { isCommitteeRole, isStaffRole }
+export { isCoachRole, isCommitteeRole, isStaffRole }
 
 export async function getProfile(): Promise<Profile | null> {
   if (isPreviewMode()) return PREVIEW_COACH_PROFILE

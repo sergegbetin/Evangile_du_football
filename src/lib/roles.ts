@@ -1,5 +1,9 @@
 import type { UserRole } from "@/types/database"
 
+export function isCoachRole(role: UserRole): boolean {
+  return role === "coach"
+}
+
 export function isCommitteeRole(role: UserRole): boolean {
   return role === "committee" || role === "super_admin"
 }

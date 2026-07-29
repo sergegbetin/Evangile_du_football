@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react"
 import { TOURNAMENT } from "@/lib/constants"
-import { isCommitteeRole } from "@/lib/roles"
+import { isCoachRole, isCommitteeRole } from "@/lib/roles"
 import type { Profile, UserRole } from "@/types/database"
 import { signOut } from "@/lib/actions/auth"
 import { TournamentLogo } from "@/components/landing/tournament-logo"
@@ -95,6 +95,7 @@ export function DashboardShell({
   isPreview,
 }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const isCoach = isCoachRole(profile.role)
   const showAdmin = isCommitteeRole(profile.role) || isPreview
 
   return (
@@ -111,14 +112,23 @@ export function DashboardShell({
         </div>
 
         <nav className="flex-1 space-y-1 p-3" aria-label="Navigation tableau de bord">
-          <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/70">
-            Espace coach
-          </p>
-          <NavLinks links={coachLinks} currentPath={currentPath} />
+          {isCoach && (
+            <>
+              <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/70">
+                Espace coach
+              </p>
+              <NavLinks links={coachLinks} currentPath={currentPath} />
+            </>
+          )}
 
           {showAdmin && (
             <>
-              <p className="mt-4 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/70">
+              <p
+                className={cn(
+                  "px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/70",
+                  isCoach && "mt-4"
+                )}
+              >
                 Administration
               </p>
               <NavLinks links={adminLinks} currentPath={currentPath} />
@@ -175,14 +185,21 @@ export function DashboardShell({
           </button>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-          <NavLinks
-            links={coachLinks}
-            currentPath={currentPath}
-            onNavigate={() => setMobileOpen(false)}
-          />
+          {isCoach && (
+            <NavLinks
+              links={coachLinks}
+              currentPath={currentPath}
+              onNavigate={() => setMobileOpen(false)}
+            />
+          )}
           {showAdmin && (
             <>
-              <p className="mt-4 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/70">
+              <p
+                className={cn(
+                  "px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-white/70",
+                  isCoach && "mt-4"
+                )}
+              >
                 Administration
               </p>
               <NavLinks
