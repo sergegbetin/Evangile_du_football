@@ -35,6 +35,42 @@ const updatePasswordSchema = z.object({
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
 })
 
+/** Translate raw Supabase Auth errors into French coach-facing messages. */
+function mapAuthErrorMessage(message: string): string {
+  const lower = message.toLowerCase()
+
+  const rateLimitMatch = message.match(/after\s+(\d+)\s+seconds?/i)
+  if (
+    rateLimitMatch
+    || lower.includes("only request this after")
+    || lower.includes("rate limit")
+    || lower.includes("too many requests")
+  ) {
+    const seconds = rateLimitMatch?.[1]
+    return seconds
+      ? `Trop de tentatives. Pour des raisons de sécurité, réessayez dans ${seconds} secondes (un seul clic suffit).`
+      : "Trop de tentatives. Pour des raisons de sécurité, attendez environ une minute puis réessayez (un seul clic suffit)."
+  }
+
+  if (lower.includes("user already registered") || lower.includes("already been registered")) {
+    return "Un compte existe déjà avec cette adresse e-mail. Connectez-vous ou utilisez « Mot de passe oublié »."
+  }
+
+  if (lower.includes("password") && (lower.includes("weak") || lower.includes("short"))) {
+    return "Mot de passe trop faible. Utilisez au moins 6 caractères."
+  }
+
+  if (lower.includes("invalid email") || lower.includes("unable to validate email")) {
+    return "Adresse e-mail invalide."
+  }
+
+  if (lower.includes("signup is disabled") || lower.includes("signups not allowed")) {
+    return "Les inscriptions sont temporairement fermées. Contactez le comité."
+  }
+
+  return message
+}
+
 export async function signIn(formData: FormData) {
   if (!isSupabaseConfigured()) {
     return {
@@ -93,7 +129,7 @@ export async function signUp(formData: FormData) {
   })
 
   if (error) {
-    return { success: false as const, error: error.message }
+    return { success: false as const, error: mapAuthErrorMessage(error.message) }
   }
 
   // Email confirmation enabled: no session until the user confirms.
@@ -158,7 +194,7 @@ export async function updatePassword(
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password })
 
   if (error) {
-    return { success: false, error: error.message }
+    return { success: false, error: mapAuthErrorMessage(error.message) }
   }
 
   return { success: true }
