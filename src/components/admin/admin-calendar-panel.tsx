@@ -18,8 +18,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { TOURNAMENT } from "@/lib/constants"
 import { DashboardEmptyState } from "@/components/layout/dashboard-empty-state"
 import { getJoinedName } from "@/lib/utils"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
+import {
+  formatTournamentDateTime,
+  utcIsoToBeninDatetimeLocal,
+} from "@/lib/tournament-rules"
 
 import type { MatchWithTeams } from "@/types/database"
 
@@ -31,12 +33,6 @@ interface TeamOption {
 interface AdminCalendarPanelProps {
   teams: TeamOption[]
   matches: MatchWithTeams[]
-}
-
-function toDatetimeLocalValue(iso: string): string {
-  const d = new Date(iso)
-  const pad = (n: number) => String(n).padStart(2, "0")
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) {
@@ -118,7 +114,7 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
   function startEdit(match: MatchWithTeams) {
     setEditingId(match.id)
     setScoringId(null)
-    setEditScheduledAt(toDatetimeLocalValue(match.scheduled_at))
+    setEditScheduledAt(utcIsoToBeninDatetimeLocal(match.scheduled_at))
     setEditVenue(match.venue || TOURNAMENT.venue)
     setEditRound(match.round ?? "")
     setError(null)
@@ -198,7 +194,7 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="scheduled_at">Date et heure</Label>
+              <Label htmlFor="scheduled_at">Date et heure (Bénin, UTC+1)</Label>
               <Input id="scheduled_at" name="scheduled_at" type="datetime-local" className="min-h-11" required />
             </div>
             <div className="space-y-2">
@@ -256,7 +252,7 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(match.scheduled_at), "EEEE d MMMM yyyy à HH:mm", { locale: fr })}
+                    {formatTournamentDateTime(match.scheduled_at)}
                     {match.round && ` — ${match.round}`}
                   </p>
                   <p className="text-sm text-muted-foreground">
@@ -267,7 +263,7 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
                     <div className="mt-3 space-y-3 rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div className="space-y-1">
-                          <Label htmlFor={`sched-${match.id}`}>Date et heure</Label>
+                          <Label htmlFor={`sched-${match.id}`}>Date et heure (Bénin, UTC+1)</Label>
                           <Input
                             id={`sched-${match.id}`}
                             type="datetime-local"

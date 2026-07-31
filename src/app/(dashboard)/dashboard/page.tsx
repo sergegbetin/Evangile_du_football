@@ -13,11 +13,10 @@ import { DashboardPanel } from "@/components/layout/dashboard-panel"
 import { DashboardStatCard } from "@/components/layout/dashboard-stat-card"
 import { TEAM_STATUS_LABELS, TOURNAMENT } from "@/lib/constants"
 import {
+  formatTournamentDateTime,
   getPresenceRequiredMessage,
   TEAM_PAYMENT_STATUS_LABELS,
 } from "@/lib/tournament-rules"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
 
 export const metadata = {
   title: "Tableau de bord",
@@ -70,9 +69,7 @@ export default async function DashboardPage() {
           <AlertDescription className="text-white/80">
             <p>{getPresenceRequiredMessage(upcomingMatch.scheduled_at)}</p>
             <p className="mt-1 text-sm text-white/60">
-              {format(new Date(upcomingMatch.scheduled_at), "EEEE d MMMM yyyy 'à' HH'h'mm", {
-                locale: fr,
-              })}
+              {formatTournamentDateTime(upcomingMatch.scheduled_at)}
               {upcomingMatch.round ? ` — ${upcomingMatch.round}` : ""}
             </p>
           </AlertDescription>

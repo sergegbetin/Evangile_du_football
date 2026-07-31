@@ -10,6 +10,9 @@ import {
   getRosterLockMessage,
   isClaimSubmissionAllowed,
   isRosterLocked,
+  beninWallTimeToUtcIso,
+  utcIsoToBeninDatetimeLocal,
+  formatTournamentDateTime,
 } from "@/lib/tournament-rules"
 import { TOURNAMENT } from "@/lib/constants"
 
@@ -194,6 +197,26 @@ describe("getPresenceRequiredMessage", () => {
     expect(kickoff.getTime() - presenceAt.getTime()).toBe(
       TOURNAMENT.presenceHoursBeforeMatch * 60 * 60 * 1000
     )
+  })
+})
+
+describe("beninWallTimeToUtcIso", () => {
+  it("treats datetime-local as Benin wall time (UTC+1)", () => {
+    expect(beninWallTimeToUtcIso("2026-08-02T16:00")).toBe(
+      "2026-08-02T15:00:00.000Z"
+    )
+  })
+
+  it("round-trips with utcIsoToBeninDatetimeLocal", () => {
+    const wall = "2026-08-02T16:00"
+    const iso = beninWallTimeToUtcIso(wall)
+    expect(utcIsoToBeninDatetimeLocal(iso)).toBe(wall)
+  })
+
+  it("formats tournament datetime in Benin", () => {
+    const formatted = formatTournamentDateTime("2026-08-02T15:00:00.000Z")
+    expect(formatted).toMatch(/16/)
+    expect(formatted).toMatch(/2026/)
   })
 })
 

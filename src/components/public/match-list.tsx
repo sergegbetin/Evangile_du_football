@@ -1,8 +1,7 @@
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
 import { Calendar, Clock, MapPin } from "lucide-react"
 import type { MatchWithTeams } from "@/types/database"
 import {
+  formatTournamentDate,
   formatTournamentHourTime,
   getPresenceRequiredMessage,
 } from "@/lib/tournament-rules"
@@ -102,7 +101,7 @@ export function MatchList({
             <div className="mt-4 flex flex-wrap items-center justify-center gap-4 border-t border-white/5 pt-4 text-xs text-white/40">
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5" />
-                {format(new Date(match.scheduled_at), "EEEE d MMMM yyyy", { locale: fr })}
+                {formatTournamentDate(match.scheduled_at)}
               </span>
               <span>
                 {formatTournamentHourTime(new Date(match.scheduled_at)).replace("h", ":")}

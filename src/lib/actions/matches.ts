@@ -8,6 +8,7 @@ import { getDemoMatches, getDemoStandings } from "@/lib/demo-data"
 import { requireCommittee } from "@/lib/auth"
 import { isPreviewMode, PREVIEW_MUTATION_ERROR } from "@/lib/preview-mode"
 import { logAudit } from "@/lib/actions/audit"
+import { beninWallTimeToUtcIso } from "@/lib/tournament-rules"
 import type { ActionResult, Match, MatchWithTeams } from "@/types/database"
 
 const matchSchema = z.object({
@@ -177,13 +178,20 @@ export async function createMatch(
     return { success: false, error: "Les deux équipes doivent être différentes" }
   }
 
+  let scheduledAtIso: string
+  try {
+    scheduledAtIso = beninWallTimeToUtcIso(parsed.data.scheduled_at)
+  } catch {
+    return { success: false, error: "Date/heure invalide" }
+  }
+
   const supabase = await createClient()
   const { data, error } = await supabase
     .from("matches")
     .insert({
       home_team_id: parsed.data.home_team_id,
       away_team_id: parsed.data.away_team_id,
-      scheduled_at: new Date(parsed.data.scheduled_at).toISOString(),
+      scheduled_at: scheduledAtIso,
       venue: parsed.data.venue,
       round: parsed.data.round ?? null,
     })
@@ -329,10 +337,17 @@ export async function updateMatchSchedule(
     }
   }
 
+  let scheduledAtIso: string
+  try {
+    scheduledAtIso = beninWallTimeToUtcIso(parsed.data.scheduled_at)
+  } catch {
+    return { success: false, error: "Date/heure invalide" }
+  }
+
   const { data: updated, error } = await supabase
     .from("matches")
     .update({
-      scheduled_at: new Date(parsed.data.scheduled_at).toISOString(),
+      scheduled_at: scheduledAtIso,
       venue: parsed.data.venue.trim(),
       round: parsed.data.round?.trim() || null,
     })
@@ -344,7 +359,7 @@ export async function updateMatchSchedule(
   if (!updated) return { success: false, error: "Match introuvable" }
 
   await logAudit("match.schedule_updated", "matches", parsed.data.match_id, {
-    scheduled_at: parsed.data.scheduled_at,
+    scheduled_at: scheduledAtIso,
     venue: parsed.data.venue.trim(),
   })
   revalidatePath("/admin/calendrier")

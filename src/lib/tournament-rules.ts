@@ -130,6 +130,94 @@ export function formatTournamentHourTime(date: Date): string {
   return `${hour}h${minute}`
 }
 
+/**
+ * Bénin (Africa/Porto-Novo) has no DST — fixed UTC+1.
+ * Used so admin datetime-local values are independent of browser timezone.
+ */
+const BENIN_UTC_OFFSET = "+01:00"
+
+function getTournamentZonedParts(date: Date): {
+  year: string
+  month: string
+  day: string
+  hour: string
+  minute: string
+} {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TOURNAMENT.timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date)
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "00"
+
+  return {
+    year: get("year"),
+    month: get("month"),
+    day: get("day"),
+    hour: get("hour") === "24" ? "00" : get("hour"),
+    minute: get("minute"),
+  }
+}
+
+/**
+ * Parse a `datetime-local` value (`YYYY-MM-DDTHH:mm`) as Benin wall time → UTC ISO.
+ * Example: `2026-08-02T16:00` → `2026-08-02T15:00:00.000Z`
+ */
+export function beninWallTimeToUtcIso(datetimeLocal: string): string {
+  const trimmed = datetimeLocal.trim()
+  const match = trimmed.match(
+    /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/
+  )
+  if (!match) {
+    throw new Error("Date/heure invalide")
+  }
+
+  const [, year, month, day, hour, minute, second = "00"] = match
+  const withOffset = `${year}-${month}-${day}T${hour}:${minute}:${second}${BENIN_UTC_OFFSET}`
+  const utc = new Date(withOffset)
+  if (Number.isNaN(utc.getTime())) {
+    throw new Error("Date/heure invalide")
+  }
+  return utc.toISOString()
+}
+
+/** Prefill `datetime-local` from a UTC ISO timestamp, in Benin wall time. */
+export function utcIsoToBeninDatetimeLocal(iso: string): string {
+  const zoned = getTournamentZonedParts(new Date(iso))
+  return `${zoned.year}-${zoned.month}-${zoned.day}T${zoned.hour}:${zoned.minute}`
+}
+
+/** Full date + time in Benin (e.g. for admin / dashboard lists). */
+export function formatTournamentDateTime(iso: string): string {
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone: TOURNAMENT.timeZone,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(iso))
+}
+
+/** Calendar date only in Benin (e.g. public match cards). */
+export function formatTournamentDate(iso: string): string {
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone: TOURNAMENT.timeZone,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(iso))
+}
+
 /** Presence check-in time: `presenceHoursBeforeMatch` before kickoff (reglement). */
 export function getPresenceRequiredAt(scheduledAt: string): Date {
   return new Date(
