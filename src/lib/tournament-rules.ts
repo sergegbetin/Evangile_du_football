@@ -55,11 +55,17 @@ export function computeTotalMatchCount(
 }
 
 export function isRosterLocked(
-  team: Pick<Team, "status">,
+  team: Pick<Team, "status"> & { roster_unlocked_until?: string | null },
   firstMatchAt: string | null
 ): boolean {
+  // Déverrouillage temporaire accordé par le comité.
+  if (team.roster_unlocked_until) {
+    const unlockUntil = new Date(team.roster_unlocked_until).getTime()
+    if (Date.now() < unlockUntil) return false
+  }
+
   // Une équipe approved reste éditable : seul le verrou temporel
-  // (24h avant son premier match) ferme l'effectif.
+  // (24h avant son prochain match) ferme l'effectif.
   if (!["draft", "rejected", "submitted", "approved"].includes(team.status)) {
     return true
   }
@@ -87,7 +93,7 @@ export function getRosterLockMessage(firstMatchAt: string | null): string {
   return `Effectif verrouillé — modifications closes depuis le ${lockDate.toLocaleString("fr-FR", {
     dateStyle: "short",
     timeStyle: "short",
-  })} (24 h avant le premier match)`
+  })} (24 h avant le prochain match)`
 }
 
 export function isClaimSubmissionAllowed(

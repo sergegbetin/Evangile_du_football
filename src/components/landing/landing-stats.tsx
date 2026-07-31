@@ -14,7 +14,7 @@ function StatBlock({
 }) {
   return (
     <div className="text-center">
-      <p className="text-5xl font-bold text-[#d4af37] md:text-6xl">
+      <p className="text-[clamp(2rem,10vw,3.75rem)] font-bold text-[#d4af37] md:text-6xl">
         {value}
         {suffix}
       </p>

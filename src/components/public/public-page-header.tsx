@@ -22,7 +22,7 @@ export function PublicPageHeader({
       <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
         <Link
           href={backHref}
-          className="mb-8 inline-flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-[#d4af37]"
+          className="mb-8 inline-flex min-h-11 items-center gap-2 text-sm text-white/50 transition-colors hover:text-[#d4af37]"
         >
           <ArrowLeft className="h-4 w-4" />
           {backLabel}
@@ -31,7 +31,9 @@ export function PublicPageHeader({
           <Circle className="mx-2 h-1.5 w-1.5 fill-[#d4af37] text-[#d4af37]" />
           {label}
         </p>
-        <h1 className="mt-4 text-4xl font-bold text-white md:text-5xl">{title}</h1>
+        <h1 className="mt-4 text-[clamp(1.75rem,6vw,3rem)] font-bold text-white md:text-5xl">
+          {title}
+        </h1>
         {description && (
           <p className="mt-4 max-w-2xl text-lg text-white/55">{description}</p>
         )}

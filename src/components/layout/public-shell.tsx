@@ -8,9 +8,11 @@ interface PublicShellProps {
 
 export function PublicShell({ children, className = "" }: PublicShellProps) {
   return (
-    <div className={`landing-page min-h-screen ${className}`}>
+    <div className={`landing-page min-h-[100dvh] overflow-x-clip ${className}`}>
       <LandingNavbar />
-      <div className="pt-16">{children}</div>
+      <div className="pt-[calc(4rem+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)]">
+        {children}
+      </div>
       <LandingFooter />
     </div>
   )

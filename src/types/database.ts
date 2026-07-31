@@ -32,6 +32,8 @@ export type MatchStatus =
   | "cancelled"
   | "postponed"
 
+export type MessageThreadKind = "team" | "broadcast"
+
 export interface Profile {
   id: string
   email: string
@@ -53,6 +55,7 @@ export interface Team {
   approved_at: string | null
   rejection_reason: string | null
   payment_declared_at: string | null
+  roster_unlocked_until: string | null
   created_at: string
   updated_at: string
 }
@@ -137,6 +140,34 @@ export interface AuditLog {
   created_at: string
 }
 
+export interface MessageThread {
+  id: string
+  kind: MessageThreadKind
+  team_id: string | null
+  subject: string
+  created_by: string
+  last_message_at: string
+  created_at: string
+  updated_at: string
+}
+
+export interface Message {
+  id: string
+  thread_id: string
+  sender_id: string
+  body: string
+  created_at: string
+}
+
+export interface MessageThreadWithMeta extends MessageThread {
+  team?: { name: string } | null
+  creator?: { full_name: string } | null
+}
+
+export interface MessageWithSender extends Message {
+  sender?: { full_name: string; role: UserRole } | null
+}
+
 export interface TeamWithCoach extends Team {
   coach?: Profile
 }
@@ -180,12 +211,13 @@ export interface Database {
       >
       teams: TableDef<
         Team,
-        Omit<Team, "id" | "created_at" | "updated_at" | "submitted_at" | "approved_at" | "rejection_reason" | "payment_declared_at"> & {
+        Omit<Team, "id" | "created_at" | "updated_at" | "submitted_at" | "approved_at" | "rejection_reason" | "payment_declared_at" | "roster_unlocked_until"> & {
           id?: string
           submitted_at?: string | null
           approved_at?: string | null
           rejection_reason?: string | null
           payment_declared_at?: string | null
+          roster_unlocked_until?: string | null
         },
         Partial<Omit<Team, "id">>
       >
@@ -236,6 +268,25 @@ export interface Database {
         Omit<Document, "id" | "created_at"> & { id?: string },
         Partial<Omit<Document, "id">>
       >
+      message_threads: TableDef<
+        MessageThread,
+        Omit<MessageThread, "id" | "created_at" | "updated_at" | "last_message_at" | "team_id"> & {
+          id?: string
+          team_id?: string | null
+          last_message_at?: string
+          created_at?: string
+          updated_at?: string
+        },
+        Partial<Omit<MessageThread, "id">>
+      >
+      messages: TableDef<
+        Message,
+        Omit<Message, "id" | "created_at"> & {
+          id?: string
+          created_at?: string
+        },
+        Partial<Omit<Message, "id">>
+      >
       audit_logs: {
         Row: AuditLog
         Insert: {
@@ -275,6 +326,7 @@ export interface Database {
       claim_status: ClaimStatus
       claim_decision: ClaimDecision
       match_status: MatchStatus
+      message_thread_kind: MessageThreadKind
     }
     CompositeTypes: {
       [_ in never]: never

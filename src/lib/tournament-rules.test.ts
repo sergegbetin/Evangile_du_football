@@ -59,6 +59,31 @@ describe("isRosterLocked", () => {
 
     vi.useRealTimers()
   })
+
+  it("reopens a locked roster while admin unlock is active", () => {
+    const now = new Date("2026-07-25T12:00:00.000Z")
+    vi.useFakeTimers()
+    vi.setSystemTime(now)
+
+    const matchInTwelveHours = new Date(now.getTime() + 12 * 60 * 60 * 1000).toISOString()
+    const unlockUntil = new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString()
+
+    expect(
+      isRosterLocked(
+        { status: "approved", roster_unlocked_until: unlockUntil },
+        matchInTwelveHours
+      )
+    ).toBe(false)
+
+    expect(
+      isRosterLocked(
+        { status: "approved", roster_unlocked_until: "2026-07-24T12:00:00.000Z" },
+        matchInTwelveHours
+      )
+    ).toBe(true)
+
+    vi.useRealTimers()
+  })
 })
 
 describe("getRosterLockMessage", () => {

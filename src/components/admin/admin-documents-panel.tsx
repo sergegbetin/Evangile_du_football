@@ -148,46 +148,33 @@ export function AdminDocumentsPanel({ documents }: AdminDocumentsPanelProps) {
           <CardTitle>Documents publiés</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Titre</TableHead>
-                <TableHead>Catégorie</TableHead>
-                <TableHead>Visibilité</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="w-20" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {documents.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="p-0">
-                    <DashboardEmptyState message="Aucun document publié" />
-                  </TableCell>
-                </TableRow>
-              ) : (
-                documents.map((doc) => (
-                  <TableRow key={doc.id}>
-                    <TableCell className="font-medium">
-                      <a
-                        href={doc.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline underline-offset-2"
-                      >
-                        {doc.title}
-                      </a>
-                    </TableCell>
-                    <TableCell>{CATEGORY_LABELS[doc.category] ?? doc.category}</TableCell>
-                    <TableCell>
+          {documents.length === 0 ? (
+            <DashboardEmptyState message="Aucun document publié" />
+          ) : (
+            <>
+              <ul className="space-y-3 md:hidden">
+                {documents.map((doc) => (
+                  <li
+                    key={doc.id}
+                    className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4"
+                  >
+                    <a
+                      href={doc.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium underline underline-offset-2"
+                    >
+                      {doc.title}
+                    </a>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {CATEGORY_LABELS[doc.category] ?? doc.category}
+                      {" · "}
+                      {format(new Date(doc.created_at), "dd/MM/yyyy", { locale: fr })}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
                       <Badge variant={doc.is_public ? "default" : "secondary"}>
                         {doc.is_public ? "Public" : "Interne"}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(doc.created_at), "dd/MM/yyyy", { locale: fr })}
-                    </TableCell>
-                    <TableCell>
                       <Button
                         type="button"
                         variant="ghost"
@@ -196,12 +183,61 @@ export function AdminDocumentsPanel({ documents }: AdminDocumentsPanelProps) {
                       >
                         Supprimer
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Titre</TableHead>
+                      <TableHead>Catégorie</TableHead>
+                      <TableHead>Visibilité</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="w-20" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {documents.map((doc) => (
+                      <TableRow key={doc.id}>
+                        <TableCell className="font-medium">
+                          <a
+                            href={doc.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-2"
+                          >
+                            {doc.title}
+                          </a>
+                        </TableCell>
+                        <TableCell>{CATEGORY_LABELS[doc.category] ?? doc.category}</TableCell>
+                        <TableCell>
+                          <Badge variant={doc.is_public ? "default" : "secondary"}>
+                            {doc.is_public ? "Public" : "Interne"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {format(new Date(doc.created_at), "dd/MM/yyyy", { locale: fr })}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(doc.id)}
+                          >
+                            Supprimer
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

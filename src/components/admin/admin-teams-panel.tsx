@@ -3,9 +3,16 @@
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { reassignTeamCoach, reviewTeam, type UnassignedCoach } from "@/lib/actions/teams"
+import {
+  reassignTeamCoach,
+  reviewTeam,
+  setTeamRosterUnlock,
+  updateTeamDetails,
+  type UnassignedCoach,
+} from "@/lib/actions/teams"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -23,6 +30,11 @@ function isPlaceholderCoach(email: string | null | undefined): boolean {
   return Boolean(email?.endsWith(PLACEHOLDER_EMAIL_SUFFIX))
 }
 
+function isRosterUnlockActive(unlockedUntil: string | null | undefined): boolean {
+  if (!unlockedUntil) return false
+  return new Date(unlockedUntil).getTime() > Date.now()
+}
+
 interface AdminTeamsPanelProps {
   teams: TeamWithCoachAndRoster[]
   unassignedCoaches: UnassignedCoach[]
@@ -38,6 +50,12 @@ export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelPro
   const [reassigningId, setReassigningId] = useState<string | null>(null)
   const [selectedCoachId, setSelectedCoachId] = useState("")
   const [isReassignPending, setIsReassignPending] = useState(false)
+  const [unlockingId, setUnlockingId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editName, setEditName] = useState("")
+  const [editChurch, setEditChurch] = useState("")
+  const [editPhone, setEditPhone] = useState("")
+  const [isEditPending, setIsEditPending] = useState(false)
 
   async function handleReview(teamId: string, action: "approve" | "reject") {
     setError(null)
@@ -82,6 +100,55 @@ export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelPro
     router.refresh()
   }
 
+  async function handleUnlock(teamId: string, teamName: string) {
+    setError(null)
+    setSuccess(null)
+    setUnlockingId(teamId)
+    const formData = new FormData()
+    formData.set("teamId", teamId)
+    formData.set("hours", "48")
+    const result = await setTeamRosterUnlock(formData)
+    setUnlockingId(null)
+    if (!result.success) {
+      setError(result.error)
+      return
+    }
+    const until = result.data?.unlockedUntil
+      ? format(new Date(result.data.unlockedUntil), "dd MMM yyyy à HH:mm", { locale: fr })
+      : "48 h"
+    setSuccess(`Effectif de ${teamName} ouvert jusqu'au ${until}`)
+    router.refresh()
+  }
+
+  function startEdit(team: TeamWithCoachAndRoster) {
+    setEditingId(team.id)
+    setEditName(team.name)
+    setEditChurch(team.church ?? "")
+    setEditPhone(team.contact_phone ?? "")
+    setError(null)
+    setSuccess(null)
+  }
+
+  async function handleSaveDetails(teamId: string) {
+    setError(null)
+    setSuccess(null)
+    setIsEditPending(true)
+    const formData = new FormData()
+    formData.set("teamId", teamId)
+    formData.set("name", editName)
+    formData.set("church", editChurch)
+    formData.set("contact_phone", editPhone)
+    const result = await updateTeamDetails(formData)
+    setIsEditPending(false)
+    if (!result.success) {
+      setError(result.error)
+      return
+    }
+    setEditingId(null)
+    setSuccess("Informations de l'équipe mises à jour")
+    router.refresh()
+  }
+
   return (
     <div className="space-y-4">
       {error && (
@@ -102,16 +169,25 @@ export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelPro
           const players = team.roster.filter((m) => m.member_type === "player")
           const playersWithPhoto = players.filter((m) => m.photo_url).length
           const isExpanded = expandedId === team.id
+          const unlockActive = isRosterUnlockActive(team.roster_unlocked_until)
 
           return (
             <Card key={team.id}>
               <CardHeader>
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <CardTitle className="text-lg">{team.name}</CardTitle>
+                  <CardTitle className="text-lg break-words">{team.name}</CardTitle>
                   <div className="flex flex-wrap items-center gap-2">
                     {isPlaceholderCoach(team.coach?.email) && (
                       <Badge variant="outline" className="border-amber-500/40 text-amber-400">
                         Compte placeholder
+                      </Badge>
+                    )}
+                    {unlockActive && team.roster_unlocked_until && (
+                      <Badge variant="outline" className="border-sky-500/40 text-sky-300">
+                        Effectif ouvert jusqu&apos;au{" "}
+                        {format(new Date(team.roster_unlocked_until), "dd MMM HH:mm", {
+                          locale: fr,
+                        })}
                       </Badge>
                     )}
                     <Badge>{TEAM_STATUS_LABELS[team.status] ?? team.status}</Badge>
@@ -119,17 +195,64 @@ export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelPro
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm">
-                  <span className="font-medium">Coach :</span>{" "}
-                  {team.coach?.full_name ?? "—"} ({team.coach?.email ?? "—"})
-                </p>
-                <p className="text-sm">
-                  <span className="font-medium">Église :</span> {team.church || "—"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Contact équipe : {team.contact_phone || "—"}
-                  {team.coach?.phone ? ` · Coach : ${team.coach.phone}` : ""}
-                </p>
+                {editingId === team.id ? (
+                  <div className="space-y-3 rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <div className="space-y-1">
+                      <Label htmlFor={`name-${team.id}`}>Nom de l&apos;équipe</Label>
+                      <Input
+                        id={`name-${team.id}`}
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor={`church-${team.id}`}>Église</Label>
+                      <Input
+                        id={`church-${team.id}`}
+                        value={editChurch}
+                        onChange={(e) => setEditChurch(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor={`phone-${team.id}`}>Téléphone contact</Label>
+                      <Input
+                        id={`phone-${team.id}`}
+                        value={editPhone}
+                        onChange={(e) => setEditPhone(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        disabled={isEditPending}
+                        onClick={() => handleSaveDetails(team.id)}
+                      >
+                        {isEditPending ? "Enregistrement…" : "Enregistrer"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEditingId(null)}
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm">
+                      <span className="font-medium">Coach :</span>{" "}
+                      {team.coach?.full_name ?? "—"} ({team.coach?.email ?? "—"})
+                    </p>
+                    <p className="text-sm">
+                      <span className="font-medium">Église :</span> {team.church || "—"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Contact équipe : {team.contact_phone || "—"}
+                      {team.coach?.phone ? ` · Coach : ${team.coach.phone}` : ""}
+                    </p>
+                  </>
+                )}
                 {team.submitted_at && (
                   <p className="text-sm text-muted-foreground">
                     Soumis le{" "}
@@ -160,6 +283,7 @@ export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelPro
                       type="button"
                       size="sm"
                       variant="ghost"
+                      className="min-h-11"
                       onClick={() =>
                         setExpandedId(isExpanded ? null : team.id)
                       }
@@ -215,14 +339,38 @@ export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelPro
                   )}
                 </div>
 
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {editingId !== team.id && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="min-h-11"
+                      onClick={() => startEdit(team)}
+                    >
+                      Modifier infos
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="min-h-11"
+                    disabled={unlockingId === team.id}
+                    onClick={() => handleUnlock(team.id, team.name)}
+                  >
+                    {unlockingId === team.id
+                      ? "Déverrouillage…"
+                      : "Déverrouiller 48h"}
+                  </Button>
+                </div>
+
                 <div className="pt-1">
                   {reassigningId === team.id ? (
-                    <div className="flex w-full flex-wrap items-center gap-2">
+                    <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                       <Select
                         value={selectedCoachId || undefined}
                         onValueChange={(v) => setSelectedCoachId(v ?? "")}
                       >
-                        <SelectTrigger className="min-w-56">
+                        <SelectTrigger className="w-full min-h-11 sm:max-w-md sm:min-w-0">
                           <SelectValue placeholder="Choisir un compte coach" />
                         </SelectTrigger>
                         <SelectContent>
@@ -233,28 +381,33 @@ export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelPro
                           ))}
                         </SelectContent>
                       </Select>
-                      <Button
-                        size="sm"
-                        disabled={isReassignPending || !selectedCoachId}
-                        onClick={() => handleReassign(team.id, team.name)}
-                      >
-                        {isReassignPending ? "Rattachement…" : "Confirmer"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          setReassigningId(null)
-                          setSelectedCoachId("")
-                        }}
-                      >
-                        Annuler
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          className="min-h-11"
+                          disabled={isReassignPending || !selectedCoachId}
+                          onClick={() => handleReassign(team.id, team.name)}
+                        >
+                          {isReassignPending ? "Rattachement…" : "Confirmer"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="min-h-11"
+                          onClick={() => {
+                            setReassigningId(null)
+                            setSelectedCoachId("")
+                          }}
+                        >
+                          Annuler
+                        </Button>
+                      </div>
                     </div>
                   ) : (
                     <Button
                       size="sm"
                       variant="outline"
+                      className="min-h-11"
                       disabled={unassignedCoaches.length === 0}
                       onClick={() => {
                         setReassigningId(team.id)
@@ -276,37 +429,43 @@ export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelPro
                   <div className="flex flex-wrap gap-2 pt-2">
                     <Button
                       size="sm"
+                      className="min-h-11"
                       onClick={() => handleReview(team.id, "approve")}
                     >
                       Valider
                     </Button>
                     {rejectingId === team.id ? (
-                      <div className="flex w-full flex-wrap items-end gap-2">
+                      <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
                         <Input
                           placeholder="Motif du refus"
                           value={reason}
                           onChange={(e) => setReason(e.target.value)}
-                          className="max-w-xs"
+                          className="w-full sm:max-w-xs"
                         />
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleReview(team.id, "reject")}
-                        >
-                          Confirmer refus
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setRejectingId(null)}
-                        >
-                          Annuler
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="min-h-11"
+                            onClick={() => handleReview(team.id, "reject")}
+                          >
+                            Confirmer refus
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="min-h-11"
+                            onClick={() => setRejectingId(null)}
+                          >
+                            Annuler
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <Button
                         size="sm"
                         variant="outline"
+                        className="min-h-11"
                         onClick={() => setRejectingId(team.id)}
                       >
                         Refuser

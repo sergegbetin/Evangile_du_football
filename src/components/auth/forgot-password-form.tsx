@@ -25,7 +25,7 @@ export function ForgotPasswordForm() {
 
   if (isSent) {
     return (
-      <div className="landing-glass w-full rounded-2xl p-8 text-center">
+      <div className="landing-glass w-full rounded-2xl p-5 sm:p-8 text-center">
         <h2 className="text-xl font-bold text-white">Vérifiez votre boîte mail</h2>
         <p className="mt-3 text-sm text-white/60">
           Si un compte existe pour cette adresse, un lien de réinitialisation vient
@@ -42,7 +42,7 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <div className="landing-glass w-full rounded-2xl p-8">
+    <div className="landing-glass w-full rounded-2xl p-5 sm:p-8">
       <h2 className="text-xl font-bold text-white">Mot de passe oublié</h2>
       <p className="mt-2 text-sm text-white/50">
         Recevez un lien pour réinitialiser votre mot de passe par e-mail.

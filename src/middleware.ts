@@ -10,6 +10,7 @@ const coachOnlyPrefixes = [
   "/dashboard/effectif",
   "/dashboard/paiements",
   "/dashboard/reclamations",
+  "/dashboard/messages",
 ]
 
 export async function middleware(request: NextRequest) {

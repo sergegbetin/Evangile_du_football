@@ -286,3 +286,69 @@ export async function updateMatchStatus(
   revalidatePath("/calendrier")
   return { success: true }
 }
+
+const matchScheduleSchema = z.object({
+  match_id: z.string().uuid(),
+  scheduled_at: z.string().min(1, "Date requise"),
+  venue: z.string().min(1, "Lieu requis"),
+  round: z.string().optional(),
+})
+
+/** Modifie date, lieu et tour d'un match à venir (programmé ou reporté). */
+export async function updateMatchSchedule(
+  formData: FormData
+): Promise<ActionResult> {
+  if (isPreviewMode()) return { success: false, error: PREVIEW_MUTATION_ERROR }
+
+  await requireCommittee()
+  const parsed = matchScheduleSchema.safeParse({
+    match_id: formData.get("match_id"),
+    scheduled_at: formData.get("scheduled_at"),
+    venue: formData.get("venue"),
+    round: formData.get("round") || undefined,
+  })
+
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Données invalides" }
+  }
+
+  const supabase = await createClient()
+  const { data: existing, error: fetchError } = await supabase
+    .from("matches")
+    .select("id, status")
+    .eq("id", parsed.data.match_id)
+    .maybeSingle()
+
+  if (fetchError) return { success: false, error: fetchError.message }
+  if (!existing) return { success: false, error: "Match introuvable" }
+
+  if (existing.status !== "scheduled" && existing.status !== "postponed") {
+    return {
+      success: false,
+      error: "Seuls les matchs programmés ou reportés peuvent être modifiés",
+    }
+  }
+
+  const { data: updated, error } = await supabase
+    .from("matches")
+    .update({
+      scheduled_at: new Date(parsed.data.scheduled_at).toISOString(),
+      venue: parsed.data.venue.trim(),
+      round: parsed.data.round?.trim() || null,
+    })
+    .eq("id", parsed.data.match_id)
+    .select("id")
+    .maybeSingle()
+
+  if (error) return { success: false, error: error.message }
+  if (!updated) return { success: false, error: "Match introuvable" }
+
+  await logAudit("match.schedule_updated", "matches", parsed.data.match_id, {
+    scheduled_at: parsed.data.scheduled_at,
+    venue: parsed.data.venue.trim(),
+  })
+  revalidatePath("/admin/calendrier")
+  revalidatePath("/calendrier")
+  revalidatePath("/dashboard")
+  return { success: true }
+}

@@ -92,8 +92,8 @@ export function LandingCountdown() {
             <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4">
               {units.map((unit, index) => (
                 <div key={unit.label} className="flex items-center gap-3 md:gap-4">
-                  <div className="landing-glass flex min-w-[80px] flex-col items-center rounded-2xl px-6 py-5 md:min-w-[100px] md:px-8 md:py-6">
-                    <span className="text-4xl font-bold tabular-nums text-white md:text-5xl">
+                  <div className="landing-glass flex min-w-0 flex-1 basis-[calc(50%-0.75rem)] flex-col items-center rounded-2xl px-3 py-5 sm:min-w-[80px] sm:flex-none sm:px-6 md:min-w-[100px] md:px-8 md:py-6">
+                    <span className="text-[clamp(1.75rem,8vw,3rem)] font-bold tabular-nums text-white md:text-5xl">
                       {pad(unit.value)}
                     </span>
                     <span className="mt-2 text-[10px] font-semibold tracking-[0.15em] text-white/40">

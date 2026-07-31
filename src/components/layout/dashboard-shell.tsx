@@ -8,6 +8,7 @@ import {
   CreditCard,
   FileText,
   Home,
+  Inbox,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -35,6 +36,7 @@ const coachLinks = [
   { href: "/dashboard/effectif", label: "Effectif", icon: Users },
   { href: "/dashboard/paiements", label: "Paiements", icon: CreditCard },
   { href: "/dashboard/reclamations", label: "Réclamations", icon: MessageSquare },
+  { href: "/dashboard/messages", label: "Messages", icon: Inbox },
 ]
 
 const adminLinks = [
@@ -42,6 +44,7 @@ const adminLinks = [
   { href: "/admin/paiements", label: "Paiements", icon: CreditCard },
   { href: "/admin/calendrier", label: "Calendrier", icon: Calendar },
   { href: "/admin/reclamations", label: "Réclamations", icon: MessageSquare },
+  { href: "/admin/messages", label: "Messages", icon: Inbox },
   { href: "/admin/documents", label: "Documents", icon: FileText },
 ]
 
@@ -73,7 +76,7 @@ function NavLinks({
             href={link.href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
+              "flex min-h-11 items-center gap-3 rounded-xl px-3 py-3 text-sm transition-colors",
               isActive
                 ? "bg-[#d4af37]/12 font-medium text-[#f0d060] shadow-[inset_0_0_0_1px_rgba(212,175,55,0.25)]"
                 : "text-white/65 hover:bg-white/[0.04] hover:text-white"
@@ -99,7 +102,7 @@ export function DashboardShell({
   const showAdmin = isCommitteeRole(profile.role) || isPreview
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-[100dvh]">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-white/5 bg-[#080c14] md:flex">
         <div className="border-b border-white/5 p-4">
           <Link href="/" className="flex items-center gap-3">
@@ -147,7 +150,7 @@ export function DashboardShell({
           <form action={signOut} className="mt-3">
             <button
               type="submit"
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+              className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-3 text-sm text-white/60 transition-colors hover:bg-white/5 hover:text-white"
             >
               <LogOut className="h-4 w-4" />
               Déconnexion
@@ -178,7 +181,7 @@ export function DashboardShell({
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
-            className="rounded-lg p-2 text-white/70"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-white/70"
             aria-label="Fermer le menu"
           >
             <X className="h-5 w-5" />
@@ -213,11 +216,11 @@ export function DashboardShell({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 items-center justify-between border-b border-white/5 bg-[#080c14]/80 px-4 backdrop-blur-xl md:hidden">
+        <header className="flex min-h-14 items-center justify-between border-b border-white/5 bg-[#080c14]/80 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-xl md:hidden">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="rounded-lg p-2 text-white"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-white"
             aria-label="Ouvrir le menu"
           >
             <Menu className="h-5 w-5" />
@@ -226,12 +229,12 @@ export function DashboardShell({
             <TournamentLogo size="sm" />
           </Link>
           <form action={signOut}>
-            <button type="submit" className="rounded-lg p-2 text-white/60" aria-label="Déconnexion">
+            <button type="submit" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-white/60" aria-label="Déconnexion">
               <LogOut className="h-5 w-5" />
             </button>
           </form>
         </header>
-        <main className="dashboard-main-bg flex-1 p-4 md:p-8 lg:p-10">
+        <main className="dashboard-main-bg flex-1 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:p-8 lg:p-10">
           {isPreview && (
             <div className="mb-6 rounded-xl border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-3 text-sm text-[#f0d060]">
               <strong>Mode aperçu</strong> — données fictives. Configurez Supabase pour

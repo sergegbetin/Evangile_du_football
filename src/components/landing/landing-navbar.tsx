@@ -19,7 +19,7 @@ export function LandingNavbar() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#050608]/80 backdrop-blur-xl">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#050608]/80 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
         <Link href="/" className="flex items-center gap-3">
           <TournamentLogo size="sm" />
@@ -47,7 +47,7 @@ export function LandingNavbar() {
         <div className="hidden items-center gap-3 lg:flex">
           <Link
             href="/connexion"
-            className="text-sm text-white/60 transition-colors hover:text-white"
+            className="inline-flex min-h-11 items-center px-2 text-sm text-white/60 transition-colors hover:text-white"
           >
             Connexion
           </Link>
@@ -62,7 +62,7 @@ export function LandingNavbar() {
 
         <button
           type="button"
-          className="rounded-lg p-2 text-white lg:hidden"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 text-white lg:hidden"
           onClick={() => setIsOpen(!isOpen)}
           aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
           aria-expanded={isOpen}
@@ -78,7 +78,7 @@ export function LandingNavbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="py-2 text-white/80"
+                className="inline-flex min-h-11 items-center py-3 text-white/80"
                 onClick={() => setIsOpen(false)}
               >
                 {link.label}
@@ -86,7 +86,7 @@ export function LandingNavbar() {
             ))}
             <Link
               href="/connexion"
-              className="py-2 text-white/80"
+              className="inline-flex min-h-11 items-center py-3 text-white/80"
               onClick={() => setIsOpen(false)}
             >
               Connexion

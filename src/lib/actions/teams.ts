@@ -15,6 +15,8 @@ import {
   teamSubmitSchema,
   teamReviewSchema,
   teamReassignSchema,
+  teamRosterUnlockSchema,
+  teamAdminUpdateSchema,
 } from "@/lib/validations/team"
 import { logAudit } from "@/lib/actions/audit"
 import { TOURNAMENT } from "@/lib/constants"
@@ -128,12 +130,14 @@ export async function getTeamFirstMatchAt(teamId: string): Promise<string | null
   if (isPreviewMode()) return "2026-07-26T15:00:00.000Z"
 
   const supabase = await createClient()
+  const nowIso = new Date().toISOString()
 
   const { data } = await supabase
     .from("matches")
     .select("scheduled_at")
     .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
-    .neq("status", "cancelled")
+    .not("status", "in", "(cancelled,completed)")
+    .gt("scheduled_at", nowIso)
     .order("scheduled_at", { ascending: true })
     .limit(1)
     .maybeSingle()
@@ -444,6 +448,98 @@ export async function reassignTeamCoach(
   revalidatePath("/admin/equipes")
   revalidatePath("/dashboard/equipe")
   revalidatePath("/dashboard")
+  return { success: true }
+}
+
+/** Ouvre temporairement l'effectif d'une équipe (comité). */
+export async function setTeamRosterUnlock(
+  formData: FormData
+): Promise<ActionResult<{ unlockedUntil: string }>> {
+  if (isPreviewMode()) return { success: false, error: PREVIEW_MUTATION_ERROR }
+
+  const profile = await requireCommittee()
+  const parsed = teamRosterUnlockSchema.safeParse({
+    teamId: formData.get("teamId"),
+    hours: formData.get("hours") || 48,
+  })
+
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Données invalides" }
+  }
+
+  const unlockedUntil = new Date(
+    Date.now() + parsed.data.hours * 60 * 60 * 1000
+  ).toISOString()
+
+  const supabase = await createClient()
+  const { data: updated, error } = await supabase
+    .from("teams")
+    .update({ roster_unlocked_until: unlockedUntil })
+    .eq("id", parsed.data.teamId)
+    .select("id")
+    .maybeSingle()
+
+  if (error) return { success: false, error: error.message }
+  if (!updated) return { success: false, error: "Équipe introuvable" }
+
+  await logAudit("team.roster_unlocked", "teams", parsed.data.teamId, {
+    by: profile.id,
+    hours: parsed.data.hours,
+    unlocked_until: unlockedUntil,
+  })
+  revalidatePath("/admin/equipes")
+  revalidatePath("/dashboard/effectif")
+  revalidatePath("/dashboard/equipe")
+  return { success: true, data: { unlockedUntil } }
+}
+
+/** Corrige nom / église / téléphone d'une équipe (comité). */
+export async function updateTeamDetails(
+  formData: FormData
+): Promise<ActionResult> {
+  if (isPreviewMode()) return { success: false, error: PREVIEW_MUTATION_ERROR }
+
+  const profile = await requireCommittee()
+  const parsed = teamAdminUpdateSchema.safeParse({
+    teamId: formData.get("teamId"),
+    name: formData.get("name"),
+    church: formData.get("church"),
+    contact_phone: formData.get("contact_phone"),
+  })
+
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Données invalides" }
+  }
+
+  const supabase = await createClient()
+  const { data: updated, error } = await supabase
+    .from("teams")
+    .update({
+      name: parsed.data.name.trim(),
+      church: parsed.data.church.trim(),
+      contact_phone: parsed.data.contact_phone.trim(),
+    })
+    .eq("id", parsed.data.teamId)
+    .select("id, name")
+    .maybeSingle()
+
+  if (error) {
+    if (error.code === "23505") {
+      return { success: false, error: "Ce nom d'équipe est déjà pris" }
+    }
+    return { success: false, error: error.message }
+  }
+  if (!updated) return { success: false, error: "Équipe introuvable" }
+
+  await logAudit("team.renamed", "teams", parsed.data.teamId, {
+    by: profile.id,
+    name: parsed.data.name.trim(),
+  })
+  revalidatePath("/admin/equipes")
+  revalidatePath("/admin/calendrier")
+  revalidatePath("/classement")
+  revalidatePath("/calendrier")
+  revalidatePath("/dashboard/equipe")
   return { success: true }
 }
 

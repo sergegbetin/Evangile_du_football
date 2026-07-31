@@ -37,7 +37,7 @@ export function ResetPasswordForm() {
 
   if (isDone) {
     return (
-      <div className="landing-glass w-full rounded-2xl p-8 text-center">
+      <div className="landing-glass w-full rounded-2xl p-5 sm:p-8 text-center">
         <h2 className="text-xl font-bold text-white">Mot de passe mis à jour</h2>
         <p className="mt-3 text-sm text-white/60">Redirection vers votre tableau de bord...</p>
       </div>
@@ -45,7 +45,7 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <div className="landing-glass w-full rounded-2xl p-8">
+    <div className="landing-glass w-full rounded-2xl p-5 sm:p-8">
       <h2 className="text-xl font-bold text-white">Nouveau mot de passe</h2>
       <p className="mt-2 text-sm text-white/50">
         Choisissez un nouveau mot de passe pour votre compte.

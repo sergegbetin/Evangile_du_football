@@ -53,7 +53,7 @@ export function LandingHero() {
           <TournamentLogo size="lg" withGlow className="rounded-2xl" />
         </div>
 
-        <h1 className="text-5xl font-bold tracking-tight text-white md:text-7xl lg:text-8xl">
+        <h1 className="text-[clamp(2rem,8vw,5rem)] font-bold tracking-tight text-white md:text-7xl lg:text-8xl">
           L&apos;Évangile
           <br />
           <span className="landing-text-gold">selon le Football</span>

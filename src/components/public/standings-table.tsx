@@ -28,8 +28,40 @@ export function StandingsTable({ standings, compact = false }: StandingsTablePro
 
   return (
     <div className="landing-glass overflow-hidden rounded-2xl">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-sm">
+      <ul className="divide-y divide-white/5 md:hidden">
+        {standings.map((team, index) => {
+          const rank = index + 1
+          const diff = team.goalsFor - team.goalsAgainst
+          return (
+            <li
+              key={team.teamId}
+              className={`px-4 py-4 ${rank === 1 ? "border-l-2 border-l-[#d4af37] bg-[#d4af37]/5" : ""}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <span className="inline-flex items-center gap-1 text-white/70">
+                      {rank === 1 && <Trophy className="h-4 w-4 text-[#d4af37]" />}
+                      #{rank}
+                    </span>
+                    <Shield className="h-4 w-4 shrink-0 text-[#d4af37]/60" />
+                    <span className="truncate">{team.name}</span>
+                  </p>
+                  <p className="mt-1 text-xs text-white/55">
+                    {compact
+                      ? `${team.won}V · ${team.drawn}N · ${team.lost}D`
+                      : `${team.played}J · ${team.won}V · ${team.drawn}N · ${team.lost}D · ${team.goalsFor}BP · ${team.goalsAgainst}BC · ${diff >= 0 ? "+" : ""}${diff}`}
+                  </p>
+                </div>
+                <p className="shrink-0 text-lg font-bold text-[#d4af37]">{team.points}</p>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+
+      <div className="hidden overflow-x-auto md:block">
+        <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/5 text-left text-[10px] font-semibold tracking-widest text-white/40">
               <th className="px-6 py-4">#</th>

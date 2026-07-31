@@ -63,7 +63,7 @@ export function LoginForm() {
         </div>
       )}
 
-      <div className="landing-glass w-full rounded-2xl p-8">
+      <div className="landing-glass w-full rounded-2xl p-5 sm:p-8">
         <h2 className="text-xl font-bold text-white">Connexion</h2>
         <p className="mt-2 text-sm text-white/50">
           Accédez à votre espace coach ou comité
