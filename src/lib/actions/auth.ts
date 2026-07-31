@@ -91,6 +91,14 @@ export async function signIn(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(parsed.data)
 
   if (error) {
+    const lower = error.message.toLowerCase()
+    if (lower.includes("email not confirmed") || lower.includes("not confirmed")) {
+      return {
+        success: false as const,
+        error:
+          "Votre e-mail n'est pas encore confirmé. Ouvrez le lien reçu dans votre boîte mail (pensez à vérifier les spams), puis reconnectez-vous.",
+      }
+    }
     return { success: false as const, error: "Identifiants incorrects" }
   }
 
