@@ -340,7 +340,7 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
                         </form>
                       ) : (
                         <>
-                          {needsScore && match.status !== "completed" && (
+                          {needsScore && (
                             <Button
                               size="sm"
                               className="min-h-11"
