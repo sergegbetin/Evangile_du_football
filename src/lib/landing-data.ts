@@ -52,12 +52,30 @@ export const LANDING_CHECKPOINTS = [
 ] as const
 
 export const GALLERY_IMAGES = [
-  { alt: "Prière avant le coup d'envoi" },
-  { alt: "Football à 6 au CEG Godomey" },
-  { alt: "Trophée de l'édition" },
-  { alt: "Fair-play entre églises" },
-  { alt: "Public autour du terrain" },
-  { alt: "Célébration en équipe" },
+  {
+    src: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=80",
+    alt: "Prière et communion avant le coup d'envoi",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80",
+    alt: "Football à 6 au CEG Godomey",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?auto=format&fit=crop&w=1200&q=80",
+    alt: "Trophée de l'édition",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=1200&q=80",
+    alt: "Fair-play entre églises",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1200&q=80",
+    alt: "Public autour du terrain",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec48?auto=format&fit=crop&w=1200&q=80",
+    alt: "Célébration en équipe",
+  },
 ] as const
 
 export const LANDING_PARTNERS = [
