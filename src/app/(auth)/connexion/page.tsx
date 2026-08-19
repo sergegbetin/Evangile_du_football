@@ -14,8 +14,8 @@ export default function ConnexionPage() {
     <PublicShell>
       <PublicPageHeader
         label="CONNEXION"
-        title="Espace coach & comité"
-        description="Connectez-vous pour gérer votre équipe, consulter vos paiements et soumettre des réclamations."
+        title="Espace coach et comité"
+        description="Connectez-vous pour suivre votre équipe ou traiter les dossiers du comité."
       />
       <main className="mx-auto flex max-w-md flex-col items-center gap-8 px-4 py-12 md:py-16">
         <PreviewExplorerLinks />

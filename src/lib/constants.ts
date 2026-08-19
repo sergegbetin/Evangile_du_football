@@ -1,3 +1,6 @@
+export const PUBLIC_NAVY = "#1A3A6B"
+export const PUBLIC_GOLD = "#d4af37"
+
 export const TOURNAMENT = {
   name: "L'Évangile selon le Football",
   edition: "Édition Vacances 2026",
@@ -19,7 +22,7 @@ export const TOURNAMENT = {
   totalFeeFcfa: 15_000,
   registrationFeeFcfa: 5_000,
   participationFeeFcfa: 10_000,
-  brandColor: "#1A3A6B",
+  brandColor: PUBLIC_NAVY,
   verse: "Que toutes choses se fassent avec bienséance et avec ordre.",
   verseRef: "1 Corinthiens 14:40",
   contacts: {
@@ -46,8 +49,8 @@ export const TEAM_STATUS_LABELS: Record<string, string> = {
 
 export const CLAIM_STATUS_LABELS: Record<string, string> = {
   received: "Reçue",
-  in_review: "En instruction",
-  decided: "Tranchée",
+  in_review: "En cours",
+  decided: "Décidée",
 }
 
 export const CLAIM_DECISION_LABELS: Record<string, string> = {

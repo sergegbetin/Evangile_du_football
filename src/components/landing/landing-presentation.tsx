@@ -1,4 +1,3 @@
-import Image from "next/image"
 import { Check, Circle } from "lucide-react"
 import { LANDING_CHECKPOINTS } from "@/lib/landing-data"
 import { TOURNAMENT } from "@/lib/constants"
@@ -41,14 +40,19 @@ export function LandingPresentation() {
 
         <ScrollReveal delay={150} className="relative">
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl">
-            <Image
-              src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800&q=80"
-              alt="Équipe de football sur le terrain"
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 50vw"
+            <div
+              className="absolute inset-0 bg-gradient-to-br from-[#1A3A6B] via-[#0c1a33] to-[#050608]"
+              aria-hidden
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050608]/60 to-transparent" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.22)_0%,transparent_55%)]" />
+            <div className="relative flex h-full min-h-[20rem] items-end p-8">
+              <p className="text-lg font-semibold text-white">
+                {TOURNAMENT.venue}
+                <span className="mt-1 block text-sm font-normal text-white/60">
+                  {TOURNAMENT.city} — football à 6
+                </span>
+              </p>
+            </div>
           </div>
 
         </ScrollReveal>

@@ -61,7 +61,6 @@ export function LandingCountdown() {
       className="relative overflow-hidden bg-[#080c14] py-24"
     >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(26,58,107,0.4)_0%,transparent_50%)]" />
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1920&q=20')] bg-cover bg-center opacity-10" />
 
       <div className="relative mx-auto max-w-6xl px-4">
         <ScrollReveal className="text-center">

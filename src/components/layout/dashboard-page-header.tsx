@@ -2,7 +2,7 @@ type DashboardSection = "coach" | "admin"
 
 const SECTION_LABELS: Record<DashboardSection, string> = {
   coach: "Espace coach",
-  admin: "Administration",
+  admin: "Espace comité",
 }
 
 interface DashboardPageHeaderProps {

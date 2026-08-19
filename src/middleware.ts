@@ -66,9 +66,7 @@ export async function middleware(request: NextRequest) {
       }
     } else if (profile && profile.role !== "coach") {
       const url = request.nextUrl.clone()
-      url.pathname = ["committee", "super_admin"].includes(profile.role)
-        ? "/admin/equipes"
-        : "/dashboard"
+      url.pathname = "/dashboard"
       return NextResponse.redirect(url)
     }
   }

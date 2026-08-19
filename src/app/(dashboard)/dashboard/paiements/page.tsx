@@ -66,18 +66,15 @@ export default async function PaiementsCoachPage() {
     <DashboardPageShell>
       <DashboardPageHeader
         title="Paiements"
-        description="Les frais se règlent en espèces auprès du comité. Le suivi et les reçus apparaissent ici après enregistrement."
+        description="Payez en espèces au comité, puis déclarez le versement ici."
       />
 
       <Alert className="border-[#d4af37]/25 bg-[#d4af37]/10 text-white">
-        <AlertTitle className="text-white">Paiement physique auprès du comité</AlertTitle>
+        <AlertTitle className="text-white">Espèces auprès du comité</AlertTitle>
         <AlertDescription className="text-white/80">
-          Versez les frais ({TOURNAMENT.registrationFeeFcfa.toLocaleString("fr-FR")} FCFA
-          d&apos;inscription + {TOURNAMENT.participationFeeFcfa.toLocaleString("fr-FR")} FCFA
-          de participation) en espèces au secrétariat. Après versement, cliquez sur
-          « J&apos;ai réglé auprès du comité » : le statut passe en attente jusqu&apos;à
-          confirmation. Un reçu PDF devient disponible une fois le paiement enregistré.
-          Support : WhatsApp secrétariat {TOURNAMENT.contacts.whatsapp}.
+          {TOURNAMENT.totalFeeFcfa.toLocaleString("fr-FR")} FCFA à verser au secrétariat.
+          Ensuite, cliquez sur « J&apos;ai réglé auprès du comité ». Le reçu apparaît
+          après confirmation. WhatsApp : {TOURNAMENT.contacts.whatsapp}.
         </AlertDescription>
       </Alert>
 
@@ -136,7 +133,11 @@ export default async function PaiementsCoachPage() {
 
       {!team ? (
         <DashboardPanel>
-          <DashboardEmptyState message="Inscrivez d'abord votre équipe." />
+          <DashboardEmptyState
+            message="Inscrivez d'abord votre équipe."
+            actionHref="/dashboard/equipe"
+            actionLabel="Créer mon équipe"
+          />
         </DashboardPanel>
       ) : (
         <DashboardPanel title="Historique des paiements" contentClassName="p-0 md:p-0">

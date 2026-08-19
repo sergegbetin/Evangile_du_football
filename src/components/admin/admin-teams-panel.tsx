@@ -163,9 +163,19 @@ export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelPro
       )}
 
       {teams.length === 0 ? (
-        <DashboardEmptyState message="Aucune équipe à traiter" />
+        <DashboardEmptyState
+          message="Aucune équipe à traiter"
+          actionHref="/dashboard"
+          actionLabel="Retour à l'accueil"
+        />
       ) : (
-        teams.map((team) => {
+        [...teams]
+          .sort((a, b) => {
+            const rank = (status: string) =>
+              status === "submitted" ? 0 : status === "rejected" ? 1 : 2
+            return rank(a.status) - rank(b.status)
+          })
+          .map((team) => {
           const players = team.roster.filter((m) => m.member_type === "player")
           const playersWithPhoto = players.filter((m) => m.photo_url).length
           const isExpanded = expandedId === team.id
@@ -339,92 +349,6 @@ export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelPro
                   )}
                 </div>
 
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {editingId !== team.id && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="min-h-11"
-                      onClick={() => startEdit(team)}
-                    >
-                      Modifier infos
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="min-h-11"
-                    disabled={unlockingId === team.id}
-                    onClick={() => handleUnlock(team.id, team.name)}
-                  >
-                    {unlockingId === team.id
-                      ? "Déverrouillage…"
-                      : "Déverrouiller 48h"}
-                  </Button>
-                </div>
-
-                <div className="pt-1">
-                  {reassigningId === team.id ? (
-                    <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-                      <Select
-                        value={selectedCoachId || undefined}
-                        onValueChange={(v) => setSelectedCoachId(v ?? "")}
-                      >
-                        <SelectTrigger className="w-full min-h-11 sm:max-w-md sm:min-w-0">
-                          <SelectValue placeholder="Choisir un compte coach" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {unassignedCoaches.map((coach) => (
-                            <SelectItem key={coach.id} value={coach.id}>
-                              {coach.full_name} ({coach.email})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          size="sm"
-                          className="min-h-11"
-                          disabled={isReassignPending || !selectedCoachId}
-                          onClick={() => handleReassign(team.id, team.name)}
-                        >
-                          {isReassignPending ? "Rattachement…" : "Confirmer"}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="min-h-11"
-                          onClick={() => {
-                            setReassigningId(null)
-                            setSelectedCoachId("")
-                          }}
-                        >
-                          Annuler
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="min-h-11"
-                      disabled={unassignedCoaches.length === 0}
-                      onClick={() => {
-                        setReassigningId(team.id)
-                        setSelectedCoachId("")
-                      }}
-                    >
-                      Rattacher un coach
-                    </Button>
-                  )}
-                  {unassignedCoaches.length === 0 && reassigningId !== team.id && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Aucun compte coach sans équipe — demandez au coach de créer son
-                      compte via Inscription.
-                    </p>
-                  )}
-                </div>
-
                 {team.status === "submitted" && (
                   <div className="flex flex-wrap gap-2 pt-2">
                     <Button
@@ -473,6 +397,96 @@ export function AdminTeamsPanel({ teams, unassignedCoaches }: AdminTeamsPanelPro
                     )}
                   </div>
                 )}
+
+                <details className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                  <summary className="cursor-pointer text-sm font-medium text-white/80">
+                    Plus d&apos;actions
+                  </summary>
+                  <div className="mt-3 space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      {editingId !== team.id && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="min-h-11"
+                          onClick={() => startEdit(team)}
+                        >
+                          Modifier infos
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="min-h-11"
+                        disabled={unlockingId === team.id}
+                        onClick={() => handleUnlock(team.id, team.name)}
+                      >
+                        {unlockingId === team.id
+                          ? "Déverrouillage…"
+                          : "Déverrouiller 48h"}
+                      </Button>
+                    </div>
+                    {reassigningId === team.id ? (
+                      <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                        <Select
+                          value={selectedCoachId || undefined}
+                          onValueChange={(v) => setSelectedCoachId(v ?? "")}
+                        >
+                          <SelectTrigger className="w-full min-h-11 sm:max-w-md sm:min-w-0">
+                            <SelectValue placeholder="Choisir un compte coach" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {unassignedCoaches.map((coach) => (
+                              <SelectItem key={coach.id} value={coach.id}>
+                                {coach.full_name} ({coach.email})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            className="min-h-11"
+                            disabled={isReassignPending || !selectedCoachId}
+                            onClick={() => handleReassign(team.id, team.name)}
+                          >
+                            {isReassignPending ? "Rattachement…" : "Confirmer"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="min-h-11"
+                            onClick={() => {
+                              setReassigningId(null)
+                              setSelectedCoachId("")
+                            }}
+                          >
+                            Annuler
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="min-h-11"
+                        disabled={unassignedCoaches.length === 0}
+                        onClick={() => {
+                          setReassigningId(team.id)
+                          setSelectedCoachId("")
+                        }}
+                      >
+                        Rattacher un coach
+                      </Button>
+                    )}
+                    {unassignedCoaches.length === 0 && reassigningId !== team.id && (
+                      <p className="text-xs text-muted-foreground">
+                        Aucun compte coach sans équipe — demandez au coach de créer son
+                        compte via Inscription.
+                      </p>
+                    )}
+                  </div>
+                </details>
               </CardContent>
             </Card>
           )

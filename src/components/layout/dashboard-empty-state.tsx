@@ -1,20 +1,28 @@
 import { cn } from "@/lib/utils"
+import { ButtonLink } from "@/components/ui/button-link"
 
 interface DashboardEmptyStateProps {
   message: string
   className?: string
+  actionHref?: string
+  actionLabel?: string
 }
 
-export function DashboardEmptyState({ message, className }: DashboardEmptyStateProps) {
+export function DashboardEmptyState({
+  message,
+  className,
+  actionHref,
+  actionLabel,
+}: DashboardEmptyStateProps) {
   return (
-    <p
-      className={cn(
-        "py-10 text-center text-sm text-white/60",
-        className
+    <div className={cn("py-10 text-center", className)}>
+      <p className="text-sm text-white/60">{message}</p>
+      {actionHref && actionLabel && (
+        <ButtonLink href={actionHref} className="mt-4">
+          {actionLabel}
+        </ButtonLink>
       )}
-    >
-      {message}
-    </p>
+    </div>
   )
 }
 

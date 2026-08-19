@@ -52,30 +52,12 @@ export const LANDING_CHECKPOINTS = [
 ] as const
 
 export const GALLERY_IMAGES = [
-  {
-    src: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80",
-    alt: "Stade illuminé la nuit",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&q=80",
-    alt: "Ballon au fond du filet",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1560272564-c83b66b1ad44?w=800&q=80",
-    alt: "Trophée sur le gazon",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800&q=80",
-    alt: "Joueur en action",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800&q=80",
-    alt: "Match en cours",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&q=80",
-    alt: "Célébration victoire",
-  },
+  { alt: "Prière avant le coup d'envoi" },
+  { alt: "Football à 6 au CEG Godomey" },
+  { alt: "Trophée de l'édition" },
+  { alt: "Fair-play entre églises" },
+  { alt: "Public autour du terrain" },
+  { alt: "Célébration en équipe" },
 ] as const
 
 export const LANDING_PARTNERS = [

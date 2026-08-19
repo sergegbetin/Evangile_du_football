@@ -1,17 +1,19 @@
 import { CreditCard, Clock, Home, MessageSquare, Shield } from "lucide-react"
 import { requireAuth, isCommitteeRole } from "@/lib/auth"
-import { getCoachTeam } from "@/lib/actions/teams"
-import { getCoachPaymentSummary } from "@/lib/actions/payments"
+import { getCoachTeam, getSubmittedTeams } from "@/lib/actions/teams"
+import { getCoachPaymentSummary, getAllPayments } from "@/lib/actions/payments"
 import { getCoachClaims } from "@/lib/actions/claims"
-import { getCoachUpcomingMatch } from "@/lib/actions/matches"
+import { getAllMatches, getCoachUpcomingMatch } from "@/lib/actions/matches"
+import { getTeamRoster } from "@/lib/actions/roster"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { ButtonLink } from "@/components/ui/button-link"
+import { HomeNextStepsList } from "@/components/dashboard/home-next-steps"
 import { DashboardPageHeader } from "@/components/layout/dashboard-page-header"
 import { DashboardPageShell } from "@/components/layout/dashboard-page-shell"
-import { DashboardPanel } from "@/components/layout/dashboard-panel"
 import { DashboardStatCard } from "@/components/layout/dashboard-stat-card"
 import { TEAM_STATUS_LABELS, TOURNAMENT } from "@/lib/constants"
+import { getHomeNextSteps } from "@/lib/home-next-steps"
 import {
   formatTournamentDateTime,
   getPresenceRequiredMessage,
@@ -24,17 +26,103 @@ export const metadata = {
 
 export default async function DashboardPage() {
   const profile = await requireAuth()
-  const team = await getCoachTeam()
-  const claims = await getCoachClaims()
   const isCommittee = isCommitteeRole(profile.role)
-  const paymentSummary = (await getCoachPaymentSummary()) ?? {
-    totalPaidFcfa: 0,
-    totalExpectedFcfa: TOURNAMENT.totalFeeFcfa,
-    balanceFcfa: TOURNAMENT.totalFeeFcfa,
-    status: "impaye" as const,
+
+  if (isCommittee) {
+    const [teams, payments, matches] = await Promise.all([
+      getSubmittedTeams(),
+      getAllPayments(),
+      getAllMatches(),
+    ])
+    const submittedTeamCount = teams.filter((team) => team.status === "submitted").length
+    const pendingCashCount = payments.filter((payment) => payment.status === "pending").length
+    const now = Date.now()
+    const needsCalendarAction =
+      matches.length === 0
+      || matches.some(
+        (match) =>
+          match.status === "in_progress"
+          || (
+            match.status === "scheduled"
+            && new Date(match.scheduled_at).getTime() <= now
+          )
+      )
+    const steps = getHomeNextSteps({
+      role: "committee",
+      teamStatus: null,
+      photographedPlayerCount: 0,
+      paymentStatus: "impaye",
+      submittedTeamCount,
+      pendingCashCount,
+      needsCalendarAction,
+    })
+
+    return (
+      <DashboardPageShell className="space-y-8">
+        <DashboardPageHeader
+          section="admin"
+          title={`Bonjour, ${profile.full_name.split(" ")[0]}`}
+          description="Voici ce que le comité peut traiter en priorité."
+        />
+        <HomeNextStepsList steps={steps} />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <DashboardStatCard
+            title="Inscriptions à valider"
+            icon={Shield}
+            href="/admin/equipes"
+            linkLabel="Ouvrir"
+          >
+            <p className="text-3xl font-bold tracking-tight text-white">{submittedTeamCount}</p>
+            <p className="mt-2 text-sm text-white/60">dossier(s) en attente</p>
+          </DashboardStatCard>
+          <DashboardStatCard
+            title="Paiements à confirmer"
+            icon={CreditCard}
+            href="/admin/paiements"
+            linkLabel="Ouvrir"
+          >
+            <p className="text-3xl font-bold tracking-tight text-white">{pendingCashCount}</p>
+            <p className="mt-2 text-sm text-white/60">déclaration(s) en attente</p>
+          </DashboardStatCard>
+          <DashboardStatCard
+            title="Calendrier"
+            icon={Clock}
+            href="/admin/calendrier"
+            linkLabel="Ouvrir"
+          >
+            <p className="text-sm leading-relaxed text-white/70">
+              {needsCalendarAction
+                ? "Un match à planifier ou un score à saisir."
+                : "Rien d’urgent sur le calendrier."}
+            </p>
+          </DashboardStatCard>
+        </div>
+      </DashboardPageShell>
+    )
   }
+
+  const team = await getCoachTeam()
+  const [claims, roster] = await Promise.all([
+    getCoachClaims(),
+    team ? getTeamRoster(team.id) : Promise.resolve([]),
+  ])
+  const paymentSummary = team
+    ? (await getCoachPaymentSummary())
+    : null
   const pendingClaims = claims.filter((c) => c.status !== "decided").length
   const upcomingMatch = team ? await getCoachUpcomingMatch(team.id) : null
+  const photographedPlayerCount = roster.filter(
+    (member) => member.member_type === "player" && Boolean(member.photo_url)
+  ).length
+  const steps = getHomeNextSteps({
+    role: "coach",
+    teamStatus: team?.status ?? null,
+    photographedPlayerCount,
+    paymentStatus: paymentSummary?.status ?? "impaye",
+    submittedTeamCount: 0,
+    pendingCashCount: 0,
+    needsCalendarAction: false,
+  })
 
   return (
     <DashboardPageShell className="space-y-8">
@@ -43,7 +131,9 @@ export default async function DashboardPage() {
         description={`Bienvenue sur la plateforme ${TOURNAMENT.name}.`}
       />
 
-      {paymentSummary.balanceFcfa > 0 && team && (
+      <HomeNextStepsList steps={steps} />
+
+      {paymentSummary && paymentSummary.balanceFcfa > 0 && team && (
         <Alert className="border-amber-500/30 bg-amber-500/10 text-white">
           <CreditCard className="text-amber-300" aria-hidden />
           <AlertTitle className="text-white">Frais non soldés — règlement auprès du comité</AlertTitle>
@@ -76,36 +166,6 @@ export default async function DashboardPage() {
         </Alert>
       )}
 
-      {isCommittee && (
-        <DashboardPanel
-          title="Accès administration"
-          description="Raccourcis vers les outils du comité d'organisation."
-        >
-          <div className="flex flex-wrap gap-3">
-            <ButtonLink
-              href="/admin/equipes"
-              className="bg-[#d4af37] text-[#050608] hover:bg-[#c9a030]"
-            >
-              Valider les équipes
-            </ButtonLink>
-            <ButtonLink
-              href="/admin/paiements"
-              variant="outline"
-              className="border-white/10 text-white hover:bg-white/[0.04]"
-            >
-              Enregistrer paiements
-            </ButtonLink>
-            <ButtonLink
-              href="/admin/calendrier"
-              variant="outline"
-              className="border-white/10 text-white hover:bg-white/[0.04]"
-            >
-              Gérer le calendrier
-            </ButtonLink>
-          </div>
-        </DashboardPanel>
-      )}
-
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <DashboardStatCard title="Mon équipe" icon={Home} href="/dashboard/equipe" linkLabel="Gérer">
           {team ? (
@@ -132,27 +192,31 @@ export default async function DashboardPage() {
           linkLabel="Détails"
         >
           <p className="text-3xl font-bold tracking-tight text-[#d4af37]">
-            {paymentSummary.totalPaidFcfa.toLocaleString("fr-FR")}{" "}
+            {(paymentSummary?.totalPaidFcfa ?? 0).toLocaleString("fr-FR")}{" "}
             <span className="text-lg font-medium text-white/60">FCFA</span>
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Badge
               variant="secondary"
               className={
-                paymentSummary.status === "paye"
+                paymentSummary?.status === "paye"
                   ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                  : paymentSummary.status === "en_attente"
+                  : paymentSummary?.status === "en_attente"
                     ? "border-sky-500/30 bg-sky-500/10 text-sky-200"
-                    : paymentSummary.status === "partiel"
+                    : paymentSummary?.status === "partiel"
                       ? "border-amber-500/30 bg-amber-500/10 text-amber-200"
                       : "border-white/10 bg-white/[0.06] text-white/70"
               }
             >
-              {TEAM_PAYMENT_STATUS_LABELS[paymentSummary.status]}
+              {paymentSummary
+                ? TEAM_PAYMENT_STATUS_LABELS[paymentSummary.status]
+                : "Pas encore d’équipe"}
             </Badge>
-            <span className="text-sm text-white/60">
-              sur {paymentSummary.totalExpectedFcfa.toLocaleString("fr-FR")} FCFA
-            </span>
+            {paymentSummary && (
+              <span className="text-sm text-white/60">
+                sur {paymentSummary.totalExpectedFcfa.toLocaleString("fr-FR")} FCFA
+              </span>
+            )}
           </div>
         </DashboardStatCard>
 
@@ -166,21 +230,6 @@ export default async function DashboardPage() {
           <p className="mt-2 text-sm text-white/60">dossier(s) en cours de traitement</p>
         </DashboardStatCard>
       </div>
-
-      {isCommittee && (
-        <DashboardPanel
-          title="Vue comité"
-          description="Vous pouvez aussi accéder à l'administration depuis le menu latéral."
-          contentClassName="flex items-start gap-3 text-sm text-white/60"
-        >
-          <Shield className="mt-0.5 h-4 w-4 shrink-0 text-[#d4af37]" aria-hidden />
-          <p>
-            Les sections <strong className="font-medium text-white/80">Administration</strong>{" "}
-            regroupent la validation des équipes, les paiements, le calendrier et les documents
-            officiels.
-          </p>
-        </DashboardPanel>
-      )}
     </DashboardPageShell>
   )
 }

@@ -116,11 +116,11 @@ export function RosterManager({
 
   if (!team) {
     return (
-      <Alert>
-        <AlertDescription>
-          Créez d&apos;abord votre équipe avant de gérer l&apos;effectif.
-        </AlertDescription>
-      </Alert>
+      <DashboardEmptyState
+        message="Créez d'abord votre équipe avant d'ajouter des joueurs."
+        actionHref="/dashboard/equipe"
+        actionLabel="Créer mon équipe"
+      />
     )
   }
 
@@ -155,7 +155,11 @@ export function RosterManager({
         </CardHeader>
         <CardContent>
           {members.length === 0 ? (
-            <DashboardEmptyState message="Aucun membre enregistré" />
+            <DashboardEmptyState
+              message="Ajoutez au moins 6 joueurs avec photo pour soumettre le dossier."
+              actionHref="#ajouter-joueur"
+              actionLabel="Ajouter un joueur"
+            />
           ) : (
             <>
               <div className="space-y-3 md:hidden">
@@ -291,7 +295,7 @@ export function RosterManager({
       </Card>
 
       {canEdit && (
-        <Card>
+        <Card id="ajouter-joueur">
           <CardHeader>
             <CardTitle>
               {editingMember ? "Modifier un membre" : "Ajouter un membre"}

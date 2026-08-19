@@ -40,6 +40,7 @@ const coachLinks = [
 ]
 
 const adminLinks = [
+  { href: "/dashboard", label: "Accueil", icon: Home },
   { href: "/admin/equipes", label: "Validation équipes", icon: ClipboardList },
   { href: "/admin/paiements", label: "Paiements", icon: CreditCard },
   { href: "/admin/calendrier", label: "Calendrier", icon: Calendar },
@@ -69,7 +70,10 @@ function NavLinks({
     <>
       {links.map((link) => {
         const Icon = link.icon
-        const isActive = currentPath === link.href
+        const isActive =
+          link.href === "/dashboard"
+            ? currentPath === "/dashboard"
+            : currentPath === link.href || currentPath.startsWith(`${link.href}/`)
         return (
           <Link
             key={link.href}

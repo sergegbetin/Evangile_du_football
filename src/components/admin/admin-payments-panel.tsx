@@ -57,6 +57,10 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
   const [paymentType, setPaymentType] = useState<"registration" | "participation">("registration")
   const [teamId, setTeamId] = useState("")
 
+  const pendingPayments = payments.filter((p) => p.status === "pending")
+  const otherPayments = payments.filter((p) => p.status !== "pending")
+  const orderedPayments = [...pendingPayments, ...otherPayments]
+
   const teamsWithBalance = teams.filter((team) => {
     const summary = teamSummaries[team.id]
     return summary ? summary.balanceFcfa > 0 : true
@@ -91,6 +95,21 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
       setError(result.error)
     } else {
       setSuccess("Paiement annulé")
+      router.refresh()
+    }
+  }
+
+  async function handleConfirm(paymentId: string) {
+    setError(null)
+    setSuccess(null)
+    const formData = new FormData()
+    formData.set("payment_id", paymentId)
+    formData.set("status", "confirmed")
+    const result = await updatePaymentStatus(formData)
+    if (!result.success) {
+      setError(result.error)
+    } else {
+      setSuccess("Paiement confirmé")
       router.refresh()
     }
   }
@@ -203,7 +222,11 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
         </CardHeader>
         <CardContent>
           {teams.length === 0 ? (
-            <DashboardEmptyState message="Aucune équipe validée" />
+            <DashboardEmptyState
+              message="Aucune équipe validée"
+              actionHref="/dashboard"
+              actionLabel="Retour à l'accueil"
+            />
           ) : (
             <>
               <div className="space-y-3 md:hidden">
@@ -281,11 +304,15 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
         </CardHeader>
         <CardContent>
           {payments.length === 0 ? (
-            <DashboardEmptyState message="Aucun paiement" />
+            <DashboardEmptyState
+              message="Aucun paiement"
+              actionHref="/dashboard"
+              actionLabel="Retour à l'accueil"
+            />
           ) : (
             <>
               <div className="space-y-3 md:hidden">
-                {payments.map((p) => (
+                {orderedPayments.map((p) => (
                   <article
                     key={p.id}
                     className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4"
@@ -310,15 +337,25 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
                         : "Date non renseignée"}
                     </p>
                     {p.status === "pending" && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="mt-3"
-                        onClick={() => handleCancel(p.id)}
-                      >
-                        Annuler
-                      </Button>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="min-h-11"
+                          onClick={() => handleConfirm(p.id)}
+                        >
+                          Confirmer le versement
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="min-h-11"
+                          onClick={() => handleCancel(p.id)}
+                        >
+                          Annuler
+                        </Button>
+                      </div>
                     )}
                   </article>
                 ))}
@@ -339,7 +376,7 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {payments.map((p) => (
+                    {orderedPayments.map((p) => (
                       <TableRow key={p.id}>
                         <TableCell className="font-mono text-sm">{p.receipt_number}</TableCell>
                         <TableCell className="text-sm">{p.reference || "—"}</TableCell>
@@ -356,14 +393,23 @@ export function AdminPaymentsPanel({ teams, payments, teamSummaries }: AdminPaym
                         </TableCell>
                         <TableCell>
                           {p.status === "pending" && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleCancel(p.id)}
-                            >
-                              Annuler
-                            </Button>
+                            <div className="flex flex-wrap gap-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => handleConfirm(p.id)}
+                              >
+                                Confirmer
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCancel(p.id)}
+                              >
+                                Annuler
+                              </Button>
+                            </div>
                           )}
                         </TableCell>
                       </TableRow>

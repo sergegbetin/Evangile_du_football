@@ -17,7 +17,7 @@ export function PublicPageHeader({
   backLabel = "Retour à l'accueil",
 }: PublicPageHeaderProps) {
   return (
-    <div className="relative overflow-hidden border-b border-white/5 bg-[#080c14]">
+    <div className="relative overflow-hidden border-b border-white/5 bg-[#1A3A6B]">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.1)_0%,transparent_55%)]" />
       <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
         <Link

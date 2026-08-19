@@ -90,8 +90,8 @@ export function AdminClaimsPanel({ claims }: AdminClaimsPanelProps) {
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="received">Reçue</SelectItem>
-                            <SelectItem value="in_review">En instruction</SelectItem>
-                            <SelectItem value="decided">Tranchée</SelectItem>
+                            <SelectItem value="in_review">En cours</SelectItem>
+                            <SelectItem value="decided">Décidée</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

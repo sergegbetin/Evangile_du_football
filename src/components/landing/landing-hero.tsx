@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import { ChevronDown, Play, Sparkles, Trophy } from "lucide-react"
 import { TournamentLogo } from "@/components/landing/tournament-logo"
@@ -16,17 +15,9 @@ const particles = Array.from({ length: 12 }, (_, i) => ({
 
 export function LandingHero() {
   return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
-      <Image
-        src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1920&q=80"
-        alt="Stade de football la nuit"
-        fill
-        priority
-        className="object-cover"
-        sizes="100vw"
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#050608]/70 via-[#050608]/85 to-[#050608]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.12)_0%,transparent_60%)]" />
+    <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--public-navy,#1A3A6B)]">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#1A3A6B] via-[#0c1a33] to-[#050608]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.18)_0%,transparent_60%)]" />
 
       {particles.map((p) => (
         <span
@@ -77,11 +68,11 @@ export function LandingHero() {
             Inscrire une équipe
           </Link>
           <Link
-            href="#tournoi"
+            href="/calendrier"
             className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-4 text-base font-medium text-white backdrop-blur-sm transition-colors hover:border-[#d4af37]/40 hover:bg-white/10"
           >
             <Play className="h-5 w-5 fill-white" aria-hidden />
-            Découvrir le tournoi
+            Voir le calendrier
           </Link>
         </div>
       </div>

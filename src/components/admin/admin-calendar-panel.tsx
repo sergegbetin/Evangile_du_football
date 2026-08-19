@@ -228,12 +228,22 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
       <div className="space-y-3">
         <h2 className="font-semibold">Matchs programmés</h2>
         {matches.length === 0 ? (
-          <DashboardEmptyState message="Aucun match" />
+          <DashboardEmptyState
+            message="Aucun match"
+            actionHref="/dashboard"
+            actionLabel="Retour à l'accueil"
+          />
         ) : (
           matches.map((match) => {
             const badge = statusBadge[match.status] ?? statusBadge.scheduled
             const canEditSchedule =
               match.status === "scheduled" || match.status === "postponed"
+            const needsScore =
+              match.status === "in_progress"
+              || (
+                match.status === "scheduled"
+                && new Date(match.scheduled_at).getTime() <= Date.now()
+              )
 
             return (
               <Card key={match.id}>
@@ -330,7 +340,16 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
                         </form>
                       ) : (
                         <>
-                          {canEditSchedule && (
+                          {needsScore && match.status !== "completed" && (
+                            <Button
+                              size="sm"
+                              className="min-h-11"
+                              onClick={() => setScoringId(match.id)}
+                            >
+                              Saisir le score
+                            </Button>
+                          )}
+                          {canEditSchedule && !needsScore && (
                             <Button
                               size="sm"
                               variant="outline"
@@ -340,46 +359,63 @@ export function AdminCalendarPanel({ teams, matches }: AdminCalendarPanelProps) 
                               Modifier date / lieu
                             </Button>
                           )}
-                          {match.status === "scheduled" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="min-h-11"
-                              onClick={() => setScoringId(match.id)}
-                            >
-                              Saisir le score
-                            </Button>
-                          )}
-                          {match.status !== "postponed" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="min-h-11"
-                              onClick={() => handleStatus(match.id, "postponed")}
-                            >
-                              Reporter
-                            </Button>
-                          )}
-                          {match.status !== "cancelled" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="min-h-11"
-                              onClick={() => handleStatus(match.id, "cancelled")}
-                            >
-                              Annuler le match
-                            </Button>
-                          )}
-                          {(match.status === "postponed" || match.status === "cancelled") && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="min-h-11"
-                              onClick={() => handleStatus(match.id, "scheduled")}
-                            >
-                              Remettre en programmé
-                            </Button>
-                          )}
+                          <details className="w-full">
+                            <summary className="cursor-pointer text-sm text-white/70">
+                              Plus d&apos;actions
+                            </summary>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {canEditSchedule && needsScore && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="min-h-11"
+                                  onClick={() => startEdit(match)}
+                                >
+                                  Modifier date / lieu
+                                </Button>
+                              )}
+                              {match.status === "scheduled" && !needsScore && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="min-h-11"
+                                  onClick={() => setScoringId(match.id)}
+                                >
+                                  Saisir le score
+                                </Button>
+                              )}
+                              {match.status !== "postponed" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="min-h-11"
+                                  onClick={() => handleStatus(match.id, "postponed")}
+                                >
+                                  Reporter
+                                </Button>
+                              )}
+                              {match.status !== "cancelled" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="min-h-11"
+                                  onClick={() => handleStatus(match.id, "cancelled")}
+                                >
+                                  Annuler le match
+                                </Button>
+                              )}
+                              {(match.status === "postponed" || match.status === "cancelled") && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="min-h-11"
+                                  onClick={() => handleStatus(match.id, "scheduled")}
+                                >
+                                  Remettre en programmé
+                                </Button>
+                              )}
+                            </div>
+                          </details>
                         </>
                       )}
                     </div>

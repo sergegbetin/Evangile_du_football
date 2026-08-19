@@ -1,5 +1,4 @@
-import { Circle, Play } from "lucide-react"
-import Image from "next/image"
+import { Circle } from "lucide-react"
 import { GALLERY_IMAGES } from "@/lib/landing-data"
 import { ScrollReveal } from "@/components/landing/scroll-reveal"
 
@@ -17,22 +16,12 @@ export function LandingGallery() {
           </h2>
         </ScrollReveal>
 
-        <div className="mt-12 columns-1 gap-4 sm:columns-2 lg:columns-3">
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {GALLERY_IMAGES.map((image, index) => (
-            <ScrollReveal key={image.src} delay={index * 60} className="mb-4 break-inside-avoid">
-              <div className="group relative overflow-hidden rounded-2xl">
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  width={800}
-                  height={index % 2 === 0 ? 600 : 500}
-                  className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/40">
-                  <div className="flex h-14 w-14 scale-0 items-center justify-center rounded-full bg-[#d4af37] text-[#050608] shadow-xl transition-transform duration-300 group-hover:scale-100">
-                    <Play className="h-6 w-6 fill-current pl-0.5" aria-hidden />
-                  </div>
-                </div>
+            <ScrollReveal key={image.alt} delay={index * 60}>
+              <div className="relative overflow-hidden rounded-2xl border border-[#d4af37]/15 bg-gradient-to-br from-[#1A3A6B] to-[#050608] p-8">
+                <p className="text-lg font-semibold text-white">{image.alt}</p>
+                <p className="mt-2 text-sm text-white/50">Édition 2026</p>
               </div>
             </ScrollReveal>
           ))}
